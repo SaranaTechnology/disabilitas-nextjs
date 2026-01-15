@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
-import { Menu, X, Shield, LogOut, User } from 'lucide-react';
+import { Menu, X, Shield, LogOut, User, Calendar, LayoutDashboard } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
@@ -12,6 +12,7 @@ const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [isTherapist, setIsTherapist] = useState(false);
   const { user, signOut } = useAuth();
   const router = useRouter();
 
@@ -28,6 +29,12 @@ const Header = () => {
       setIsAdmin(true);
     } else {
       setIsAdmin(false);
+    }
+
+    if (user?.role === 'therapy' || user?.role === 'therapist_independent') {
+      setIsTherapist(true);
+    } else {
+      setIsTherapist(false);
     }
   }, [user]);
 
@@ -82,6 +89,22 @@ const Header = () => {
             >
               Forum
             </Link>
+            {user && !isTherapist && (
+              <Link
+                href="/jadwal"
+                className="text-gray-600 hover:text-primary px-4 py-2 text-sm font-medium transition-colors duration-200 rounded-md hover:bg-primary/5"
+              >
+                Jadwal
+              </Link>
+            )}
+            {isTherapist && (
+              <Link
+                href="/dashboard"
+                className="text-primary font-semibold px-4 py-2 text-sm transition-colors duration-200 rounded-md hover:bg-primary/5"
+              >
+                Dashboard
+              </Link>
+            )}
           </nav>
 
           {/* Auth Button & Admin Button */}
@@ -177,6 +200,26 @@ const Header = () => {
               >
                 Forum
               </Link>
+              {user && !isTherapist && (
+                <Link
+                  href="/jadwal"
+                  className="text-gray-600 hover:text-primary hover:bg-primary/5 block px-4 py-3 text-base font-medium rounded-md transition-colors"
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  <Calendar size={16} className="inline mr-2" />
+                  Jadwal Saya
+                </Link>
+              )}
+              {isTherapist && (
+                <Link
+                  href="/dashboard"
+                  className="text-primary hover:bg-primary/5 block px-4 py-3 text-base font-semibold rounded-md transition-colors"
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  <LayoutDashboard size={16} className="inline mr-2" />
+                  Dashboard Terapis
+                </Link>
+              )}
 
               <div className="pt-4 border-t mt-4 space-y-2">
                 {user && (

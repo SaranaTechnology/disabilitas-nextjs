@@ -47,12 +47,15 @@ export interface LoginCredentials {
   password: string;
 }
 
+export type UserRole = 'user_disabilitas' | 'orang_tua' | 'therapy' | 'therapist_independent' | 'admin';
+
 export interface RegisterCredentials {
   email: string;
   password: string;
   full_name: string;
   parent_name?: string;
   phone?: string;
+  role?: UserRole;
 }
 
 // Profile Types
@@ -279,8 +282,14 @@ export interface TherapyLocationRegister {
 }
 
 // Contact Message Types
+export type ContactType = 'contact' | 'feedback' | 'bug' | 'aduan';
+export type ContactCategory = 'general' | 'feature' | 'complaint' | 'praise';
+
 export interface ContactMessage {
   id: string;
+  type: ContactType;
+  category: ContactCategory;
+  rating?: number; // 1-5, optional for feedback
   name: string;
   email: string;
   phone?: string;
@@ -295,6 +304,9 @@ export interface ContactMessage {
 }
 
 export interface ContactMessageInsert {
+  type?: ContactType;
+  category?: ContactCategory;
+  rating?: number;
   name: string;
   email: string;
   phone?: string;
@@ -362,6 +374,9 @@ export interface ArticleUpdate {
 }
 
 // Learning Resource Types
+export type ResourceType = 'article' | 'video' | 'pdf' | 'ebook' | 'infographic' | 'guide' | 'template';
+export type ResourceCategory = 'panduan' | 'tutorial' | 'aksesibilitas' | 'komunitas' | 'hukum' | 'kesehatan' | 'pendidikan' | 'pekerjaan';
+
 export interface Resource {
   id: string;
   title: string;
@@ -369,10 +384,16 @@ export interface Resource {
   category: string;
   type: string;
   content_url?: string;
+  file_url?: string;
+  file_size?: number; // in bytes
+  file_type?: string; // pdf, docx, etc
   read_time: string;
   image_url?: string;
   is_published: boolean;
+  is_downloadable: boolean;
+  download_count?: number;
   author_id?: string;
+  author_name?: string;
   created_at: string;
   updated_at: string;
 }
@@ -383,9 +404,13 @@ export interface ResourceInsert {
   category: string;
   type?: string;
   content_url?: string;
+  file_url?: string;
+  file_size?: number;
+  file_type?: string;
   read_time?: string;
   image_url?: string;
   is_published?: boolean;
+  is_downloadable?: boolean;
 }
 
 export interface ResourceUpdate extends Partial<ResourceInsert> {}

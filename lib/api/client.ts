@@ -328,6 +328,22 @@ class ApiClient {
       },
       getCategories: async () => {
         return await this.makeRequest<string[]>(`/public/resources/categories`);
+      },
+      getTypes: async () => {
+        return await this.makeRequest<string[]>(`/public/resources/types`);
+      },
+      listDownloadable: async (params: { category?: string; limit?: number; offset?: number } = {}) => {
+        const qs = new URLSearchParams();
+        if (params.category) qs.set('category', params.category);
+        if (params.limit) qs.set('limit', String(params.limit));
+        if (params.offset) qs.set('offset', String(params.offset));
+        const suffix = qs.toString() ? `?${qs.toString()}` : '';
+        return await this.makeRequest<Resource[]>(`/public/resources/downloadable${suffix}`);
+      },
+      download: async (id: string) => {
+        return await this.makeRequest<{ id: string; title: string; file_url: string; file_type: string; file_size: number }>(`/public/resources/${id}/download`, {
+          method: 'POST',
+        });
       }
     },
     therapyLocations: {
@@ -676,6 +692,40 @@ class ApiClient {
     }
   };
 
+  // Helper to transform PascalCase to snake_case for event data
+  private transformEvent(e: any): Event {
+    return {
+      id: e.ID || e.id,
+      title: e.Title || e.title,
+      mode: (e.Mode || e.mode || 'online').toLowerCase(),
+      start_at: e.StartAt || e.start_at,
+      end_at: e.EndAt || e.end_at,
+      host_user_id: e.HostUserID || e.host_user_id,
+      community_id: e.CommunityID || e.community_id,
+      capacity: e.Capacity || e.capacity,
+      location: e.Location || e.location,
+      join_url: e.JoinURL || e.join_url,
+      host_url: e.HostURL || e.host_url,
+      status: (e.Status || e.status || 'published') as any,
+      published_at: e.PublishedAt || e.published_at,
+      created_at: e.CreatedAt || e.created_at,
+      updated_at: e.UpdatedAt || e.updated_at,
+    };
+  }
+
+  // Helper to transform PascalCase to snake_case for community data
+  private transformCommunity(c: any): Community {
+    return {
+      id: c.ID || c.id,
+      name: c.Name || c.name,
+      description: c.Description || c.description,
+      tags: c.Tags || c.tags,
+      is_private: c.IsPrivate || c.is_private || false,
+      created_by: c.CreatedBy || c.created_by,
+      created_at: c.CreatedAt || c.created_at,
+    };
+  }
+
   // Events methods
   events = {
     list: async (params: { limit?: number; offset?: number } = {}) => {
@@ -683,10 +733,18 @@ class ApiClient {
       if (params.limit) qs.set('limit', String(params.limit));
       if (params.offset) qs.set('offset', String(params.offset));
       const suffix = qs.toString() ? `?${qs.toString()}` : '';
-      return await this.makeRequest<Event[]>(`/events${suffix}`);
+      const response = await this.makeRequest<any[]>(`/events${suffix}`);
+      if (response.data && Array.isArray(response.data)) {
+        return { ...response, data: response.data.map(e => this.transformEvent(e)) };
+      }
+      return response as ApiResponse<Event[]>;
     },
     get: async (id: string) => {
-      return await this.makeRequest<Event>(`/events/${id}`);
+      const response = await this.makeRequest<any>(`/events/${id}`);
+      if (response.data) {
+        return { ...response, data: this.transformEvent(response.data) };
+      }
+      return response as ApiResponse<Event>;
     },
     create: async (data: EventCreate) => {
       return await this.makeRequest<Event>('/events', {
@@ -709,10 +767,18 @@ class ApiClient {
       if (params.limit) qs.set('limit', String(params.limit));
       if (params.offset) qs.set('offset', String(params.offset));
       const suffix = qs.toString() ? `?${qs.toString()}` : '';
-      return await this.makeRequest<Event[]>(`/admin/events${suffix}`);
+      const response = await this.makeRequest<any[]>(`/admin/events${suffix}`);
+      if (response.data && Array.isArray(response.data)) {
+        return { ...response, data: response.data.map(e => this.transformEvent(e)) };
+      }
+      return response as ApiResponse<Event[]>;
     },
     get: async (id: string) => {
-      return await this.makeRequest<Event>(`/admin/events/${id}`);
+      const response = await this.makeRequest<any>(`/admin/events/${id}`);
+      if (response.data) {
+        return { ...response, data: this.transformEvent(response.data) };
+      }
+      return response as ApiResponse<Event>;
     },
     create: async (data: EventCreate) => {
       return await this.makeRequest<Event>('/admin/events', {
@@ -741,10 +807,18 @@ class ApiClient {
       if (params.page) qs.set('page', String(params.page));
       if (params.per_page) qs.set('per_page', String(params.per_page));
       const suffix = qs.toString() ? `?${qs.toString()}` : '';
-      return await this.makeRequest<Community[]>(`/communities${suffix}`);
+      const response = await this.makeRequest<any[]>(`/communities${suffix}`);
+      if (response.data && Array.isArray(response.data)) {
+        return { ...response, data: response.data.map(c => this.transformCommunity(c)) };
+      }
+      return response as ApiResponse<Community[]>;
     },
     get: async (id: string) => {
-      return await this.makeRequest<Community>(`/communities/${id}`);
+      const response = await this.makeRequest<any>(`/communities/${id}`);
+      if (response.data) {
+        return { ...response, data: this.transformCommunity(response.data) };
+      }
+      return response as ApiResponse<Community>;
     },
     create: async (data: CommunityCreate) => {
       return await this.makeRequest<Community>('/communities', {

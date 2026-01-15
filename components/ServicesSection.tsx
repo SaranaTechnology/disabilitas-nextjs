@@ -20,15 +20,7 @@ const ServicesSection = () => {
 
   const services = [
     {
-      icon: Accessibility,
-      title: 'Konsultasi Aksesibilitas',
-      description: 'Dapatkan konsultasi gratis tentang aksesibilitas dan dukungan yang Anda butuhkan.',
-      features: ['Evaluasi kebutuhan', 'Rekomendasi alat bantu', 'Panduan implementasi'],
-      color: 'bg-purple-500',
-      lightColor: 'bg-purple-100',
-      textColor: 'text-purple-600',
-    },
-    {
+      id: 'layanan-kesehatan',
       icon: Heart,
       title: 'Layanan Kesehatan',
       description: 'Akses mudah ke layanan kesehatan yang ramah disabilitas.',
@@ -36,8 +28,10 @@ const ServicesSection = () => {
       color: 'bg-pink-500',
       lightColor: 'bg-pink-100',
       textColor: 'text-pink-600',
+      available: true,
     },
     {
+      id: 'komunitas-support',
       icon: Users,
       title: 'Komunitas Support',
       description: 'Bergabung dengan komunitas yang saling mendukung.',
@@ -45,8 +39,21 @@ const ServicesSection = () => {
       color: 'bg-blue-500',
       lightColor: 'bg-blue-100',
       textColor: 'text-blue-600',
+      available: true,
     },
     {
+      id: 'konsultasi-aksesibilitas',
+      icon: Accessibility,
+      title: 'Konsultasi Aksesibilitas',
+      description: 'Dapatkan konsultasi gratis tentang aksesibilitas dan dukungan yang Anda butuhkan.',
+      features: ['Evaluasi kebutuhan', 'Rekomendasi alat bantu', 'Panduan implementasi'],
+      color: 'bg-purple-500',
+      lightColor: 'bg-purple-100',
+      textColor: 'text-purple-600',
+      available: false,
+    },
+    {
+      id: 'sumber-belajar',
       icon: BookOpen,
       title: 'Sumber Belajar',
       description: 'Kumpulan materi belajar dan informasi untuk pengembangan diri.',
@@ -54,8 +61,10 @@ const ServicesSection = () => {
       color: 'bg-green-500',
       lightColor: 'bg-green-100',
       textColor: 'text-green-600',
+      available: false,
     },
     {
+      id: 'peluang-kerja',
       icon: Briefcase,
       title: 'Peluang Kerja',
       description: 'Platform pencarian kerja inklusif yang ramah disabilitas.',
@@ -63,8 +72,10 @@ const ServicesSection = () => {
       color: 'bg-orange-500',
       lightColor: 'bg-orange-100',
       textColor: 'text-orange-600',
+      available: false,
     },
     {
+      id: 'program-pelatihan',
       icon: GraduationCap,
       title: 'Program Pelatihan',
       description: 'Berbagai program pelatihan untuk pengembangan skill.',
@@ -72,8 +83,18 @@ const ServicesSection = () => {
       color: 'bg-teal-500',
       lightColor: 'bg-teal-100',
       textColor: 'text-teal-600',
+      available: false,
     },
   ];
+
+  const handleServiceClick = (service: typeof services[0]) => {
+    if (!service.available) return;
+    if (service.id === 'layanan-kesehatan') {
+      router.push('/#layanan');
+    } else if (service.id === 'komunitas-support') {
+      router.push('/komunitas');
+    }
+  };
 
   return (
     <section id="sumber-daya" className="py-16 px-4 bg-white">
@@ -94,12 +115,24 @@ const ServicesSection = () => {
             const IconComponent = service.icon;
             return (
               <Card
-                key={service.title}
-                className="group hover:shadow-lg transition-all duration-300 border border-gray-100 hover:border-primary/20"
+                key={service.id}
+                className={`group transition-all duration-300 border border-gray-100 ${
+                  service.available
+                    ? 'hover:shadow-lg hover:border-primary/20 cursor-pointer'
+                    : 'opacity-75'
+                }`}
+                onClick={() => handleServiceClick(service)}
               >
                 <CardHeader className="pb-3">
-                  <div className={`w-12 h-12 rounded-lg ${service.lightColor} flex items-center justify-center mb-3`}>
-                    <IconComponent className={`w-6 h-6 ${service.textColor}`} />
+                  <div className="flex items-start justify-between">
+                    <div className={`w-12 h-12 rounded-lg ${service.lightColor} flex items-center justify-center mb-3`}>
+                      <IconComponent className={`w-6 h-6 ${service.textColor}`} />
+                    </div>
+                    {!service.available && (
+                      <span className="text-xs bg-gray-100 text-gray-500 px-2 py-1 rounded-full">
+                        Coming Soon
+                      </span>
+                    )}
                   </div>
                   <CardTitle className="text-lg font-semibold text-gray-900">
                     {service.title}
@@ -122,9 +155,14 @@ const ServicesSection = () => {
                   <Button
                     variant="outline"
                     size="sm"
-                    className="w-full border-gray-200 text-gray-600 hover:border-primary hover:text-primary hover:bg-primary/5"
+                    className={`w-full border-gray-200 ${
+                      service.available
+                        ? 'text-gray-600 hover:border-primary hover:text-primary hover:bg-primary/5 group-hover:border-primary group-hover:text-primary'
+                        : 'text-gray-400 cursor-not-allowed'
+                    }`}
+                    disabled={!service.available}
                   >
-                    Pelajari Lebih Lanjut
+                    {service.available ? 'Lihat Layanan' : 'Segera Hadir'}
                     <ArrowRight className="w-4 h-4 ml-1" />
                   </Button>
                 </CardContent>

@@ -7,28 +7,28 @@ import Link from 'next/link';
 const Footer = () => {
   const footerLinks = {
     platform: [
-      { name: 'Tentang Kami', href: '#tentang' },
-      { name: 'Cara Kerja', href: '#cara-kerja' },
-      { name: 'Keamanan & Privasi', href: '#keamanan' },
-      { name: 'Syarat & Ketentuan', href: '#syarat' }
+      { name: 'Tentang Kami', href: '/tentang' },
+      { name: 'Cara Kerja', href: '/cara-kerja' },
+      { name: 'Keamanan & Privasi', href: '/keamanan' },
+      { name: 'Syarat & Ketentuan', href: '/syarat-ketentuan' }
     ],
     layanan: [
-      { name: 'Cari Lokasi Terapi', href: '/#layanan' },
-      { name: 'Konsultasi Online', href: '/#layanan' },
+      { name: 'Cari Lokasi Terapi', href: '/layanan' },
+      { name: 'Konsultasi Online', href: '/layanan' },
       { name: 'Forum Komunitas', href: '/forum' },
-      { name: 'Event & Workshop', href: '/#komunitas' }
+      { name: 'Event & Workshop', href: '/acara' }
     ],
     dukungan: [
-      { name: 'Pusat Bantuan', href: '#bantuan' },
-      { name: 'FAQ', href: '#faq' },
-      { name: 'Kontak Support', href: '/#kontak' },
-      { name: 'Laporan Bug', href: '#bug' }
+      { name: 'Pusat Bantuan', href: '/bantuan' },
+      { name: 'FAQ', href: '/faq' },
+      { name: 'Feedback', href: '/feedback' },
+      { name: 'Kontak Support', href: 'mailto:support@disabilitasku.id' }
     ],
     aksesibilitas: [
-      { name: 'Panduan Aksesibilitas', href: '#aksesibilitas' },
-      { name: 'Fitur WCAG', href: '#wcag' },
-      { name: 'Umpan Balik', href: '/#kontak' },
-      { name: 'Saran Perbaikan', href: '/#kontak' }
+      { name: 'Panduan Aksesibilitas', href: '/aksesibilitas' },
+      { name: 'Fitur WCAG', href: '/aksesibilitas' },
+      { name: 'Umpan Balik', href: '/feedback' },
+      { name: 'Saran Perbaikan', href: '/feedback' }
     ]
   };
 
@@ -82,12 +82,12 @@ const Footer = () => {
             <ul className="space-y-3">
               {footerLinks.platform.map((link) => (
                 <li key={link.name}>
-                  <a
+                  <Link
                     href={link.href}
                     className="text-gray-300 hover:text-primary transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-gray-900 rounded"
                   >
                     {link.name}
-                  </a>
+                  </Link>
                 </li>
               ))}
             </ul>
@@ -99,12 +99,12 @@ const Footer = () => {
             <ul className="space-y-3">
               {footerLinks.layanan.map((link) => (
                 <li key={link.name}>
-                  <a
+                  <Link
                     href={link.href}
                     className="text-gray-300 hover:text-primary transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-gray-900 rounded"
                   >
                     {link.name}
-                  </a>
+                  </Link>
                 </li>
               ))}
             </ul>
@@ -116,12 +116,21 @@ const Footer = () => {
             <ul className="space-y-3">
               {footerLinks.dukungan.map((link) => (
                 <li key={link.name}>
-                  <a
-                    href={link.href}
-                    className="text-gray-300 hover:text-primary transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-gray-900 rounded"
-                  >
-                    {link.name}
-                  </a>
+                  {link.href.startsWith('mailto:') ? (
+                    <a
+                      href={link.href}
+                      className="text-gray-300 hover:text-primary transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-gray-900 rounded"
+                    >
+                      {link.name}
+                    </a>
+                  ) : (
+                    <Link
+                      href={link.href}
+                      className="text-gray-300 hover:text-primary transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-gray-900 rounded"
+                    >
+                      {link.name}
+                    </Link>
+                  )}
                 </li>
               ))}
             </ul>
@@ -133,12 +142,12 @@ const Footer = () => {
             <ul className="space-y-3 mb-6">
               {footerLinks.aksesibilitas.map((link) => (
                 <li key={link.name}>
-                  <a
+                  <Link
                     href={link.href}
                     className="text-gray-300 hover:text-primary transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-gray-900 rounded"
                   >
                     {link.name}
-                  </a>
+                  </Link>
                 </li>
               ))}
             </ul>
@@ -175,7 +184,7 @@ const Footer = () => {
         <div className="border-t border-gray-800 mt-12 pt-8">
           <div className="flex flex-col md:flex-row justify-between items-center">
             <div className="text-gray-400 text-sm mb-4 md:mb-0">
-              © 2025 DisabilitasKu. Semua hak cipta dilindungi.
+              © 2026 DisabilitasKu. Semua hak cipta dilindungi.
             </div>
 
             {/* WCAG Compliance Badge */}
@@ -187,12 +196,12 @@ const Footer = () => {
                 <span>Compliant</span>
               </div>
               <div className="text-sm text-gray-400">
-                <a
-                  href="#aksesibilitas"
+                <Link
+                  href="/aksesibilitas"
                   className="hover:text-primary transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-gray-900 rounded"
                 >
                   Laporan Aksesibilitas
-                </a>
+                </Link>
               </div>
             </div>
           </div>
