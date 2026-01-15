@@ -31,27 +31,27 @@ const ResourcesSection = () => {
     { id: 'komunitas', label: 'Komunitas', icon: Users },
   ];
 
-  // Fallback data when no resources from API
+  // Fallback data when no resources from API - Real downloadable content
   const fallbackResources: Record<string, Resource[]> = {
     panduan: [
-      { id: '1', title: 'Panduan Aksesibilitas Digital', description: 'Panduan lengkap untuk mengakses layanan digital.', category: 'panduan', type: 'Artikel', read_time: '15 mnt', is_published: true, created_at: '', updated_at: '' },
-      { id: '2', title: 'Manual Penggunaan Platform', description: 'Cara menggunakan semua fitur platform DisabilitasKu.', category: 'panduan', type: 'Tutorial', read_time: '10 mnt', is_published: true, created_at: '', updated_at: '' },
-      { id: '3', title: 'Kiat Hidup Mandiri', description: 'Tips praktis untuk kehidupan sehari-hari.', category: 'panduan', type: 'Artikel', read_time: '8 mnt', is_published: true, created_at: '', updated_at: '' },
+      { id: '1', title: 'Analisis Situasi Penyandang Disabilitas di Indonesia', description: 'Desk-review komprehensif dari ILO tentang situasi penyandang disabilitas di Indonesia.', category: 'panduan', type: 'PDF', content_url: 'https://www.ilo.org/media/331586/download', read_time: '75 mnt', is_published: true, is_downloadable: true, created_at: '', updated_at: '' },
+      { id: '2', title: 'Kendala Pembangunan Inklusif Disabilitas', description: 'Working paper SMERU tentang tantangan pembangunan inklusif.', category: 'panduan', type: 'PDF', content_url: 'https://smeru.or.id/sites/default/files/publication/wp_disabilitas_in_0.pdf', read_time: '50 mnt', is_published: true, is_downloadable: true, created_at: '', updated_at: '' },
+      { id: '3', title: 'Penilaian Inklusi Gender dan Disabilitas', description: 'Laporan UNICEF tentang inklusi gender dan disabilitas.', category: 'panduan', type: 'PDF', content_url: 'https://www.unicef.org/indonesia/id/media/22896/file/Penilaian%20Inklusi%20Gender%20dan%20Disabilitas.pdf', read_time: '60 mnt', is_published: true, is_downloadable: true, created_at: '', updated_at: '' },
     ],
     tutorial: [
-      { id: '4', title: 'Cara Mendaftar Layanan Terapi', description: 'Tutorial langkah demi langkah mendaftar terapi.', category: 'tutorial', type: 'Video', read_time: '5 mnt', is_published: true, created_at: '', updated_at: '' },
-      { id: '5', title: 'Menggunakan Fitur Aksesibilitas', description: 'Pelajari semua fitur aksesibilitas.', category: 'tutorial', type: 'Tutorial', read_time: '7 mnt', is_published: true, created_at: '', updated_at: '' },
-      { id: '6', title: 'Bergabung dengan Komunitas', description: 'Panduan berpartisipasi di forum.', category: 'tutorial', type: 'Tutorial', read_time: '4 mnt', is_published: true, created_at: '', updated_at: '' },
+      { id: '4', title: 'Strategi Pembelajaran Bagi ABK', description: 'Buku strategi pembelajaran untuk anak berkebutuhan khusus.', category: 'tutorial', type: 'PDF', content_url: 'http://info.trilogi.ac.id/repository/assets/uploads/PGSD/61c05-buku-strategi-pembelajaran-bagi-abk-full_compressed_compressed.pdf', read_time: '120 mnt', is_published: true, is_downloadable: true, created_at: '', updated_at: '' },
+      { id: '5', title: '11 Jenis Terapi untuk ABK', description: 'Penjelasan lengkap jenis-jenis terapi untuk anak berkebutuhan khusus.', category: 'tutorial', type: 'Artikel', content_url: 'https://www.scribd.com/document/345923643/11-Jenis-Terapi-Untuk-ABK-Anak-Berkebutuhan-Khusus', read_time: '20 mnt', is_published: true, is_downloadable: false, created_at: '', updated_at: '' },
+      { id: '6', title: 'Terapi Okupasi untuk Down Syndrome', description: 'Penelitian penerapan terapi okupasi untuk anak down syndrome.', category: 'tutorial', type: 'PDF', content_url: 'https://lib.unnes.ac.id/23361/1/1601409008.pdf', read_time: '45 mnt', is_published: true, is_downloadable: true, created_at: '', updated_at: '' },
     ],
     aksesibilitas: [
-      { id: '7', title: 'Teknologi Assistif Terkini', description: 'Informasi teknologi assistif terbaru.', category: 'aksesibilitas', type: 'Artikel', read_time: '12 mnt', is_published: true, created_at: '', updated_at: '' },
-      { id: '8', title: 'Hak-Hak Penyandang Disabilitas', description: 'Panduan hak yang dilindungi UU.', category: 'aksesibilitas', type: 'Panduan', read_time: '20 mnt', is_published: true, created_at: '', updated_at: '' },
-      { id: '9', title: 'Aksesibilitas di Tempat Kerja', description: 'Tips lingkungan kerja yang aksesibel.', category: 'aksesibilitas', type: 'Artikel', read_time: '10 mnt', is_published: true, created_at: '', updated_at: '' },
+      { id: '7', title: 'Panduan Memantau Hak-Hak Disabilitas', description: 'Panduan lengkap tentang CRPD dan pemantauan hak disabilitas.', category: 'aksesibilitas', type: 'PDF', content_url: 'https://formasidisabilitas.id/wp-content/uploads/2021/05/Panduan-Memantau-Pemenuhan-Hak-Hak-Disabilitas.pdf', read_time: '45 mnt', is_published: true, is_downloadable: true, created_at: '', updated_at: '' },
+      { id: '8', title: 'Konvensi Hak-Hak Penyandang Disabilitas', description: 'Dokumen resmi CRPD yang wajib dipahami masyarakat Indonesia.', category: 'aksesibilitas', type: 'PDF', content_url: 'https://pakis.id/wp-content/uploads/2018/07/konvensi-hak-hak-penyandang-disabilitas.pdf', read_time: '60 mnt', is_published: true, is_downloadable: true, created_at: '', updated_at: '' },
+      { id: '9', title: 'Pedoman Layanan Komunikasi Publik (2024)', description: 'Pedoman Bappenas tentang layanan komunikasi aksesibel.', category: 'aksesibilitas', type: 'PDF', content_url: 'https://ogi.bappenas.go.id/assets/img/publikasi/Pedoman%20LKIP%20Penyandang%20Disabilitas%2027%20Sept%202024.pdf', read_time: '40 mnt', is_published: true, is_downloadable: true, created_at: '', updated_at: '' },
     ],
     komunitas: [
-      { id: '10', title: 'Cerita Inspiratif: Meraih Mimpi', description: 'Kisah inspiratif dari anggota komunitas.', category: 'komunitas', type: 'Artikel', read_time: '15 mnt', is_published: true, created_at: '', updated_at: '' },
-      { id: '11', title: 'Event Komunitas Bulanan', description: 'Informasi event komunitas.', category: 'komunitas', type: 'Info', read_time: '5 mnt', is_published: true, created_at: '', updated_at: '' },
-      { id: '12', title: 'Menjadi Volunteer', description: 'Panduan menjadi volunteer.', category: 'komunitas', type: 'Panduan', read_time: '8 mnt', is_published: true, created_at: '', updated_at: '' },
+      { id: '10', title: 'Buku Panduan Guru Disabilitas Fisik', description: 'Panduan resmi Kemendikbud untuk guru mengajar siswa disabilitas fisik.', category: 'komunitas', type: 'PDF', content_url: 'https://static.buku.kemdikbud.go.id/content/pdf/bukuteks/kurikulum21/Diksus-BG-Fisik.pdf', read_time: '90 mnt', is_published: true, is_downloadable: true, created_at: '', updated_at: '' },
+      { id: '11', title: 'Buletin Situasi Penyandang Disabilitas', description: 'Buletin resmi Kemenkes tentang situasi disabilitas di Indonesia.', category: 'komunitas', type: 'PDF', content_url: 'https://media.neliti.com/media/publications/516665-none-00c39e77.pdf', read_time: '25 mnt', is_published: true, is_downloadable: true, created_at: '', updated_at: '' },
+      { id: '12', title: 'Portal Kebijakan & Regulasi Disabilitas', description: 'Kumpulan lengkap kebijakan dan regulasi dari Bappenas.', category: 'komunitas', type: 'Artikel', content_url: 'https://ditpk.bappenas.go.id/disabilitas/kebijakan-regulasi', read_time: '30 mnt', is_published: true, is_downloadable: false, created_at: '', updated_at: '' },
     ],
   };
 
