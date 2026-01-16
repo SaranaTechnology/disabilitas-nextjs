@@ -548,8 +548,7 @@ export interface PasswordResetValidate {
 
 export interface PasswordReset {
   token: string;
-  password: string;
-  password_confirmation: string;
+  new_password: string;
 }
 
 // Database-like Types for compatibility

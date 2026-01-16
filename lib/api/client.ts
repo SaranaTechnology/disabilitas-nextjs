@@ -163,16 +163,18 @@ class ApiClient {
   // Auth methods
   auth = {
     signUp: async (credentials: RegisterCredentials) => {
-      const response = await this.makeRequest<AuthResponse>('/auth/register', {
+      const response = await this.makeRequest<{ access_token: string; refresh_token: string; user: User }>('/auth/register', {
         method: 'POST',
         body: JSON.stringify(credentials),
       });
-      
+
       if (response.data && !response.error) {
-        this.setAuthToken(response.data.token);
+        this.setAuthToken(response.data.access_token);
+        // Return in expected format
+        return { data: { token: response.data.access_token, user: response.data.user }, error: undefined };
       }
-      
-      return response;
+
+      return response as any;
     },
 
     signInWithPassword: async (credentials: LoginCredentials) => {
@@ -183,13 +185,16 @@ class ApiClient {
 
       if (response.data && !response.error) {
         this.setAuthToken(response.data.access_token);
-        // Decode JWT to get user info
-        const payload = JSON.parse(atob(response.data.access_token.split('.')[1]));
+
+        // Fetch user info from /me endpoint
+        const meResponse = await this.makeRequest<any>('/me');
         const user: User = {
-          id: payload.uid,
-          email: credentials.email,
-          role: payload.role,
+          id: meResponse.data?.ID || meResponse.data?.id || meResponse.data?.user_id || '',
+          email: meResponse.data?.Email || meResponse.data?.email || credentials.email,
+          role: meResponse.data?.Role || meResponse.data?.role || 'user_disabilitas',
+          full_name: meResponse.data?.Profile?.FullName || meResponse.data?.profile?.full_name || meResponse.data?.full_name,
         };
+
         return { data: { token: response.data.access_token, user }, error: undefined };
       }
 
@@ -216,21 +221,20 @@ class ApiClient {
         return { data: { session: null } };
       }
 
-      // Decode JWT to get user info
       try {
-        const payload = JSON.parse(atob(this.authToken.split('.')[1]));
-        const user: User = {
-          id: payload.uid,
-          email: '', // Will be fetched from /me endpoint if needed
-          role: payload.role,
-        };
-
-        // Try to get more user info from /me endpoint
-        const response = await this.makeRequest<{ user_id: string; role: string }>('/me');
-        if (response.data) {
-          user.id = response.data.user_id;
-          user.role = response.data.role;
+        // Get user info from /me endpoint
+        const response = await this.makeRequest<any>('/me');
+        if (response.error || !response.data) {
+          this.removeAuthToken();
+          return { data: { session: null } };
         }
+
+        const user: User = {
+          id: response.data.ID || response.data.id || response.data.user_id || '',
+          email: response.data.Email || response.data.email || '',
+          role: response.data.Role || response.data.role || 'user_disabilitas',
+          full_name: response.data.Profile?.FullName || response.data.profile?.full_name || response.data.full_name,
+        };
 
         const session: Session = {
           user,
@@ -598,6 +602,34 @@ class ApiClient {
     },
     delete: async (id: string) => {
       return await this.makeRequest<void>(`/admin/notifications/${id}`, {
+        method: 'DELETE',
+      });
+    }
+  };
+
+  // Admin users methods
+  adminUsers = {
+    list: async (params: { page?: number; page_size?: number } = {}) => {
+      const qs = new URLSearchParams();
+      if (params.page) qs.set('page', String(params.page));
+      if (params.page_size) qs.set('page_size', String(params.page_size));
+      const suffix = qs.toString() ? `?${qs.toString()}` : '';
+      return await this.makeRequest<User[]>(`/admin/users${suffix}`);
+    },
+    create: async (data: { email: string; password: string; role?: string; full_name?: string }) => {
+      return await this.makeRequest<User>('/admin/users', {
+        method: 'POST',
+        body: JSON.stringify(data),
+      });
+    },
+    updateRole: async (id: string, role: string) => {
+      return await this.makeRequest<User>(`/admin/users/${id}/role`, {
+        method: 'PATCH',
+        body: JSON.stringify({ role }),
+      });
+    },
+    delete: async (id: string) => {
+      return await this.makeRequest<void>(`/admin/users/${id}`, {
         method: 'DELETE',
       });
     }

@@ -8,7 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { apiClient } from '@/lib/api/client';
-import { useToast } from '@/hooks/use-toast';
+import { toast } from 'sonner';
 import AdminSetup from '@/components/AdminSetup';
 import { User, Users, Stethoscope, UserCheck } from 'lucide-react';
 
@@ -53,7 +53,6 @@ export default function AuthPage() {
   const [loading, setLoading] = useState(false);
   const [showAdminSetup, setShowAdminSetup] = useState(false);
   const router = useRouter();
-  const { toast } = useToast();
 
   const selectedRole = ROLE_OPTIONS.find((r) => r.value === role);
 
@@ -69,27 +68,40 @@ export default function AuthPage() {
         });
 
         if (response.error) {
-          if (response.error.includes('Invalid login credentials') || response.error.includes('INVALID_CREDENTIALS')) {
-            toast({
-              title: "Kredensial tidak valid",
-              description: "Email atau password salah. Pastikan Anda sudah mendaftar terlebih dahulu.",
-              variant: "destructive",
-            });
-          } else {
-            throw new Error(response.error);
+          // Tampilkan pesan error dari server
+          const errorMsg = response.error.toLowerCase();
+          let title = "Login Gagal";
+          let description = response.error;
+
+          if (errorMsg.includes('invalid') || errorMsg.includes('credential') || errorMsg.includes('password') || errorMsg.includes('email')) {
+            title = "Kredensial tidak valid";
+            description = "Email atau password salah. Pastikan Anda sudah mendaftar terlebih dahulu.";
+          } else if (errorMsg.includes('not found') || errorMsg.includes('user')) {
+            title = "Akun tidak ditemukan";
+            description = "Email tidak terdaftar. Silakan daftar terlebih dahulu.";
           }
-        } else {
-          toast({
-            title: "Berhasil masuk!",
-            description: "Selamat datang kembali di DisabilitasKu.",
+
+          toast.error(title, {
+            description,
           });
-          const user = response.data?.user;
+          return; // Stop execution here
+        }
+
+        // Login berhasil
+        toast.success("Berhasil masuk!", {
+          description: "Selamat datang kembali di DisabilitasKu.",
+        });
+
+        const user = response.data?.user;
+        // Delay redirect sedikit agar toast terlihat
+        setTimeout(() => {
           if (user?.role === 'admin') {
             router.push('/admin');
           } else {
             router.push('/');
           }
-        }
+          router.refresh();
+        }, 500);
       } else {
         const signUpData: any = {
           email,
@@ -107,8 +119,7 @@ export default function AuthPage() {
 
         if (response.error) throw new Error(response.error);
 
-        toast({
-          title: "Registrasi berhasil!",
+        toast.success("Registrasi berhasil!", {
           description: "Akun Anda berhasil dibuat. Selamat datang di DisabilitasKu!",
         });
 
@@ -123,10 +134,8 @@ export default function AuthPage() {
         }
       }
     } catch (error: any) {
-      toast({
-        title: "Terjadi kesalahan",
+      toast.error("Terjadi kesalahan", {
         description: error.message,
-        variant: "destructive",
       });
     } finally {
       setLoading(false);

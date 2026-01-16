@@ -7,7 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
-import { Users, MapPin, Calendar, UserCog, Shield, BookOpen, Mail, MessageSquare, FileText, Bell } from 'lucide-react';
+import { Users, MapPin, Calendar, UserCog, Shield, BookOpen, Mail, MessageSquare, FileText, Bell, Globe } from 'lucide-react';
 import { apiClient } from '@/lib/api/client';
 import LocationManager from '@/components/admin/LocationManager';
 import TherapistManager from '@/components/admin/TherapistManager';
@@ -17,6 +17,8 @@ import ResourceManager from '@/components/admin/ResourceManager';
 import ContactManager from '@/components/admin/ContactManager';
 import ArticleManager from '@/components/admin/ArticleManager';
 import NotificationManager from '@/components/admin/NotificationManager';
+import EventManager from '@/components/admin/EventManager';
+import ComingSoon from '@/components/admin/ComingSoon';
 
 // Dev credentials
 const DEV_EMAIL = 'superadmin@disabilitasku.com';
@@ -370,9 +372,9 @@ export default function AdminPage() {
         )}
 
         <Tabs defaultValue="contacts" className="space-y-4">
-          <TabsList className="grid w-full grid-cols-8">
+          <TabsList className="flex flex-wrap gap-1">
             <TabsTrigger value="contacts" className="relative">
-              Pesan Kontak
+              Pesan
               {stats.unreadContacts > 0 && (
                 <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
                   {stats.unreadContacts}
@@ -380,12 +382,14 @@ export default function AdminPage() {
               )}
             </TabsTrigger>
             <TabsTrigger value="notifications">Notifikasi</TabsTrigger>
-            <TabsTrigger value="locations">Lokasi Terapi</TabsTrigger>
+            <TabsTrigger value="events">Acara</TabsTrigger>
+            <TabsTrigger value="locations">Lokasi</TabsTrigger>
             <TabsTrigger value="therapists">Terapis</TabsTrigger>
             <TabsTrigger value="users">Pengguna</TabsTrigger>
             <TabsTrigger value="appointments">Janji Temu</TabsTrigger>
-            <TabsTrigger value="resources">Sumber Belajar</TabsTrigger>
             <TabsTrigger value="articles">Artikel</TabsTrigger>
+            <TabsTrigger value="forum">Forum</TabsTrigger>
+            <TabsTrigger value="master-lokasi">Master Lokasi</TabsTrigger>
           </TabsList>
 
           <TabsContent value="contacts">
@@ -394,6 +398,10 @@ export default function AdminPage() {
 
           <TabsContent value="notifications">
             <NotificationManager />
+          </TabsContent>
+
+          <TabsContent value="events">
+            <EventManager />
           </TabsContent>
 
           <TabsContent value="locations">
@@ -412,12 +420,38 @@ export default function AdminPage() {
             <AppointmentManager />
           </TabsContent>
 
-          <TabsContent value="resources">
-            <ResourceManager />
-          </TabsContent>
-
           <TabsContent value="articles">
             <ArticleManager />
+          </TabsContent>
+
+          <TabsContent value="forum">
+            <ComingSoon
+              title="Kelola Forum"
+              description="Moderasi dan pengelolaan forum diskusi komunitas"
+              icon={<MessageSquare className="h-5 w-5" />}
+              features={[
+                'Lihat semua thread dan balasan',
+                'Moderasi konten forum',
+                'Hapus thread/balasan yang melanggar',
+                'Statistik aktivitas forum',
+                'Pin thread penting',
+              ]}
+            />
+          </TabsContent>
+
+          <TabsContent value="master-lokasi">
+            <ComingSoon
+              title="Master Data Lokasi"
+              description="Kelola data negara, provinsi, dan kota"
+              icon={<Globe className="h-5 w-5" />}
+              features={[
+                'CRUD data negara',
+                'CRUD data provinsi/state',
+                'CRUD data kota',
+                'Import/export data lokasi',
+                'Mapping alias lokasi',
+              ]}
+            />
           </TabsContent>
         </Tabs>
       </div>

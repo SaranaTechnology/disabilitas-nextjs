@@ -21,7 +21,6 @@ const Header = () => {
     { name: 'Layanan', href: '/layanan', isRoute: true },
     { name: 'Acara', href: '/acara', isRoute: true },
     { name: 'Komunitas', href: '/komunitas', isRoute: true },
-    { name: 'Sumber Daya', href: '/#sumber-daya', isRoute: false },
   ];
 
   useEffect(() => {
