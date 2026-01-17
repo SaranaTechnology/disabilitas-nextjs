@@ -26,6 +26,7 @@ export interface User {
   city?: string;
   date_of_birth?: string;
   gender?: string;
+  avatar_url?: string;
   created_at?: string;
   updated_at?: string;
 }
@@ -156,9 +157,13 @@ export interface AppointmentUpdate extends Partial<AppointmentInsert> {}
 export interface ForumThread {
   id: string;
   user_id: string;
+  community_id?: string;
   title: string;
   body: string;
+  tags?: string;
   status: string;
+  is_pinned?: boolean;
+  reply_count?: number;
   created_at: string;
   updated_at: string;
   user?: User;

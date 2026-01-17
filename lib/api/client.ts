@@ -638,18 +638,30 @@ class ApiClient {
   // User methods
   users = {
     get: async (id: string) => {
-      return await this.makeRequest<User>(`/users/${id}`);
+      const response = await this.makeRequest<any>(`/users/${id}`);
+      if (response.data) {
+        return { ...response, data: this.transformUser(response.data) };
+      }
+      return response as ApiResponse<User>;
     },
 
     getCurrent: async () => {
-      return await this.makeRequest<User>('/user');
+      const response = await this.makeRequest<any>('/user');
+      if (response.data) {
+        return { ...response, data: this.transformUser(response.data) };
+      }
+      return response as ApiResponse<User>;
     },
 
     update: async (id: string, data: ProfileUpdate) => {
-      return await this.makeRequest<User>(`/users/${id}`, {
+      const response = await this.makeRequest<any>(`/users/${id}`, {
         method: 'PUT',
         body: JSON.stringify(data),
       });
+      if (response.data) {
+        return { ...response, data: this.transformUser(response.data) };
+      }
+      return response as ApiResponse<User>;
     },
 
     delete: async (id: string) => {
@@ -758,6 +770,26 @@ class ApiClient {
     };
   }
 
+  // Helper to transform PascalCase to snake_case for user data
+  private transformUser(u: any): User {
+    const profile = u.Profile || u.profile || {};
+    return {
+      id: u.ID || u.id || u.user_id || '',
+      email: u.Email || u.email || '',
+      role: u.Role || u.role || 'user_disabilitas',
+      full_name: profile.FullName || profile.full_name || u.FullName || u.full_name || u.name,
+      name: profile.FullName || profile.full_name || u.FullName || u.full_name || u.name,
+      phone: profile.Phone || profile.phone || u.Phone || u.phone,
+      address: profile.Address || profile.address || u.Address || u.address,
+      city: profile.City || profile.city || u.City || u.city,
+      date_of_birth: profile.DateOfBirth || profile.date_of_birth || u.DateOfBirth || u.date_of_birth,
+      gender: profile.Gender || profile.gender || u.Gender || u.gender,
+      avatar_url: profile.AvatarURL || profile.avatar_url || u.AvatarURL || u.avatar_url,
+      created_at: u.CreatedAt || u.created_at,
+      updated_at: u.UpdatedAt || u.updated_at,
+    };
+  }
+
   // Events methods
   events = {
     list: async (params: { limit?: number; offset?: number } = {}) => {
@@ -826,6 +858,54 @@ class ApiClient {
     },
     delete: async (id: string) => {
       return await this.makeRequest<void>(`/admin/events/${id}`, {
+        method: 'DELETE',
+      });
+    }
+  };
+
+  // Admin Forum methods
+  adminForum = {
+    getStats: async () => {
+      return await this.makeRequest<{ total_threads: number; total_replies: number }>('/admin/forum/stats');
+    },
+    listThreads: async (params: { limit?: number; offset?: number; q?: string } = {}) => {
+      const qs = new URLSearchParams();
+      if (params.limit) qs.set('limit', String(params.limit));
+      if (params.offset) qs.set('offset', String(params.offset));
+      if (params.q) qs.set('q', params.q);
+      const suffix = qs.toString() ? `?${qs.toString()}` : '';
+      return await this.makeRequest<ForumThread[]>(`/admin/forum/threads${suffix}`);
+    },
+    getThread: async (id: string) => {
+      return await this.makeRequest<ForumThread & { comments: ForumComment[] }>(`/admin/forum/threads/${id}`);
+    },
+    updateThread: async (id: string, data: { title?: string; body?: string; status?: string; is_pinned?: boolean }) => {
+      return await this.makeRequest<ForumThread>(`/admin/forum/threads/${id}`, {
+        method: 'PATCH',
+        body: JSON.stringify(data),
+      });
+    },
+    deleteThread: async (id: string) => {
+      return await this.makeRequest<void>(`/admin/forum/threads/${id}`, {
+        method: 'DELETE',
+      });
+    },
+    listReplies: async (params: { limit?: number; offset?: number; thread_id?: string } = {}) => {
+      const qs = new URLSearchParams();
+      if (params.limit) qs.set('limit', String(params.limit));
+      if (params.offset) qs.set('offset', String(params.offset));
+      if (params.thread_id) qs.set('thread_id', params.thread_id);
+      const suffix = qs.toString() ? `?${qs.toString()}` : '';
+      return await this.makeRequest<ForumComment[]>(`/admin/forum/replies${suffix}`);
+    },
+    updateReply: async (id: string, data: { body?: string; status?: string }) => {
+      return await this.makeRequest<ForumComment>(`/admin/forum/replies/${id}`, {
+        method: 'PATCH',
+        body: JSON.stringify(data),
+      });
+    },
+    deleteReply: async (id: string) => {
+      return await this.makeRequest<void>(`/admin/forum/replies/${id}`, {
         method: 'DELETE',
       });
     }

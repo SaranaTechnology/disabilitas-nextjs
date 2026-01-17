@@ -18,6 +18,7 @@ import ContactManager from '@/components/admin/ContactManager';
 import ArticleManager from '@/components/admin/ArticleManager';
 import NotificationManager from '@/components/admin/NotificationManager';
 import EventManager from '@/components/admin/EventManager';
+import ForumManager from '@/components/admin/ForumManager';
 import ComingSoon from '@/components/admin/ComingSoon';
 
 // Dev credentials
@@ -425,18 +426,7 @@ export default function AdminPage() {
           </TabsContent>
 
           <TabsContent value="forum">
-            <ComingSoon
-              title="Kelola Forum"
-              description="Moderasi dan pengelolaan forum diskusi komunitas"
-              icon={<MessageSquare className="h-5 w-5" />}
-              features={[
-                'Lihat semua thread dan balasan',
-                'Moderasi konten forum',
-                'Hapus thread/balasan yang melanggar',
-                'Statistik aktivitas forum',
-                'Pin thread penting',
-              ]}
-            />
+            <ForumManager />
           </TabsContent>
 
           <TabsContent value="master-lokasi">

@@ -47,16 +47,26 @@ export default function CommunitiesPage() {
         per_page: 50,
       });
       if (response.error) {
+        // If unauthorized, show login prompt instead of error
+        if (response.error.includes('unauthorized') || response.error.includes('bearer token')) {
+          setCommunities([]);
+          setLoading(false);
+          return;
+        }
         throw new Error(response.error);
       }
       setCommunities(response.data || []);
     } catch (error) {
       console.error('Error fetching communities:', error);
-      toast({
-        title: "Error",
-        description: "Gagal mengambil data komunitas",
-        variant: "destructive",
-      });
+      // Don't show error toast for auth issues
+      const errorMsg = error instanceof Error ? error.message : '';
+      if (!errorMsg.includes('unauthorized') && !errorMsg.includes('bearer token')) {
+        toast({
+          title: "Error",
+          description: "Gagal mengambil data komunitas",
+          variant: "destructive",
+        });
+      }
     } finally {
       setLoading(false);
     }
@@ -146,12 +156,21 @@ export default function CommunitiesPage() {
             <Card className="max-w-md mx-auto">
               <CardContent className="py-12 text-center">
                 <Users className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                <h3 className="text-lg font-medium text-gray-900 mb-2">Belum Ada Komunitas</h3>
-                <p className="text-gray-600">
-                  {searchQuery
+                <h3 className="text-lg font-medium text-gray-900 mb-2">
+                  {!user ? 'Login untuk Melihat Komunitas' : 'Belum Ada Komunitas'}
+                </h3>
+                <p className="text-gray-600 mb-4">
+                  {!user
+                    ? 'Silakan login terlebih dahulu untuk melihat dan bergabung dengan komunitas'
+                    : searchQuery
                     ? 'Tidak ditemukan komunitas dengan kata kunci tersebut'
                     : 'Belum ada komunitas yang dibuat. Jadilah yang pertama!'}
                 </p>
+                {!user && (
+                  <Button onClick={() => router.push('/auth')}>
+                    Login Sekarang
+                  </Button>
+                )}
               </CardContent>
             </Card>
           ) : (
