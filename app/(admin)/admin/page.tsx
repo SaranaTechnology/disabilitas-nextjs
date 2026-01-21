@@ -21,15 +21,10 @@ import EventManager from '@/components/admin/EventManager';
 import ForumManager from '@/components/admin/ForumManager';
 import ComingSoon from '@/components/admin/ComingSoon';
 
-// Dev credentials
-const DEV_EMAIL = 'superadmin@disabilitasku.com';
-const DEV_PASSWORD = 'Admin12345';
-
 export default function AdminPage() {
-  const { user, loading, signIn } = useAuth();
+  const { user, loading } = useAuth();
   const [isAdmin, setIsAdmin] = useState(false);
   const [checkingAdmin, setCheckingAdmin] = useState(true);
-  const [devLoginAttempted, setDevLoginAttempted] = useState(false);
   const router = useRouter();
   const { toast } = useToast();
 
@@ -48,49 +43,9 @@ export default function AdminPage() {
     replied: 0,
   });
 
-  const isDev = process.env.NODE_ENV === 'development';
-
-  // Dev mode auto-login
-  const handleDevLogin = async () => {
-    if (devLoginAttempted) return;
-    setDevLoginAttempted(true);
-
-    try {
-      const response = await signIn({
-        email: DEV_EMAIL,
-        password: DEV_PASSWORD,
-      });
-      if (!response.error) {
-        toast({
-          title: "Dev Login",
-          description: `Auto-login sebagai admin`,
-        });
-      } else {
-        toast({
-          title: "Login Gagal",
-          description: response.error,
-          variant: "destructive",
-        });
-        setDevLoginAttempted(false);
-      }
-    } catch (error: any) {
-      toast({
-        title: "Login Error",
-        description: error.message,
-        variant: "destructive",
-      });
-      setDevLoginAttempted(false);
-    }
-  };
-
   useEffect(() => {
     const checkAdminStatus = async () => {
       if (!user) {
-        // Dev mode: show dev login button instead of redirect
-        if (isDev) {
-          setCheckingAdmin(false);
-          return;
-        }
         router.push('/auth');
         return;
       }
@@ -113,7 +68,7 @@ export default function AdminPage() {
     if (!loading) {
       checkAdminStatus();
     }
-  }, [user, loading, router, toast, isDev]);
+  }, [user, loading, router, toast]);
 
   const fetchStats = async () => {
     try {
@@ -154,33 +109,6 @@ export default function AdminPage() {
           <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary mx-auto"></div>
           <p className="mt-4 text-gray-600">Memeriksa akses admin...</p>
         </div>
-      </div>
-    );
-  }
-
-  // Dev mode: show login button if not authenticated
-  if (!user && isDev) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <Card className="w-full max-w-md">
-          <CardHeader className="text-center">
-            <Shield className="h-12 w-12 text-primary mx-auto mb-2" />
-            <CardTitle>Admin Dashboard</CardTitle>
-            <CardDescription>Development Mode</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <Button
-              onClick={handleDevLogin}
-              className="w-full"
-              disabled={devLoginAttempted}
-            >
-              {devLoginAttempted ? 'Logging in...' : 'Dev Login (Admin)'}
-            </Button>
-            <p className="text-xs text-center text-gray-400">
-              Auto-login sebagai superadmin@disabilitasku.com
-            </p>
-          </CardContent>
-        </Card>
       </div>
     );
   }

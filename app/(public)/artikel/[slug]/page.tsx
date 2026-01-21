@@ -3,11 +3,35 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
+import DOMPurify from 'isomorphic-dompurify';
 import { apiClient } from '@/lib/api/client';
 import type { Article } from '@/lib/api/types';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Calendar, User, Eye, ArrowLeft, Tag } from 'lucide-react';
+
+// Configure DOMPurify to allow safe HTML tags
+const sanitizeConfig = {
+  ALLOWED_TAGS: [
+    'p', 'br', 'strong', 'b', 'em', 'i', 'u', 's', 'strike',
+    'h1', 'h2', 'h3', 'h4', 'h5', 'h6',
+    'ul', 'ol', 'li',
+    'a', 'img',
+    'blockquote', 'pre', 'code',
+    'table', 'thead', 'tbody', 'tr', 'th', 'td',
+    'div', 'span', 'hr',
+    'figure', 'figcaption',
+  ],
+  ALLOWED_ATTR: [
+    'href', 'target', 'rel', 'title',
+    'src', 'alt', 'width', 'height',
+    'class', 'id',
+  ],
+  ALLOW_DATA_ATTR: false,
+  ADD_ATTR: ['target'],
+  FORBID_TAGS: ['script', 'style', 'iframe', 'form', 'input', 'object', 'embed'],
+  FORBID_ATTR: ['onerror', 'onload', 'onclick', 'onmouseover'],
+};
 
 export default function ArticleDetailPage() {
   const params = useParams();
@@ -139,7 +163,9 @@ export default function ArticleDetailPage() {
 
         <div
           className="prose prose-lg max-w-none prose-headings:text-gray-900 prose-p:text-gray-700 prose-a:text-primary prose-img:rounded-lg"
-          dangerouslySetInnerHTML={{ __html: article.content }}
+          dangerouslySetInnerHTML={{
+            __html: DOMPurify.sanitize(article.content || '', sanitizeConfig)
+          }}
         />
 
         {tags.length > 0 && (
