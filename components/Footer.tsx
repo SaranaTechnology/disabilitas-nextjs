@@ -1,8 +1,14 @@
 'use client';
 
 
-import { Facebook, Instagram, Twitter, Mail, Phone, MapPin } from 'lucide-react';
+import { Facebook, Instagram, Mail, Phone, MapPin, Linkedin } from 'lucide-react';
 import Link from 'next/link';
+
+const TikTokIcon = ({ size = 24 }: { size?: number }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+    <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-2.88 2.5 2.89 2.89 0 0 1-2.89-2.89 2.89 2.89 0 0 1 2.89-2.89c.28 0 .54.04.79.1V9.01a6.26 6.26 0 0 0-.79-.05A6.34 6.34 0 0 0 3.15 15.3a6.34 6.34 0 0 0 6.34 6.34 6.34 6.34 0 0 0 6.34-6.34V9.05a8.16 8.16 0 0 0 4.76 1.52V7.12a4.84 4.84 0 0 1-1-.43z"/>
+  </svg>
+);
 
 const Footer = () => {
   const footerLinks = {
@@ -22,7 +28,7 @@ const Footer = () => {
       { name: 'Pusat Bantuan', href: '/bantuan' },
       { name: 'FAQ', href: '/faq' },
       { name: 'Feedback', href: '/feedback' },
-      { name: 'Kontak Support', href: 'mailto:support@disabilitasku.id' }
+      { name: 'Kontak Support', href: 'mailto:bryanwahyukp95@gmail.com' }
     ],
     aksesibilitas: [
       { name: 'Panduan Aksesibilitas', href: '/aksesibilitas' },
@@ -53,25 +59,22 @@ const Footer = () => {
             {/* Social Media */}
             <div className="flex space-x-4">
               <a
-                href="#"
+                href="https://www.tiktok.com/@disabilitasku.id"
+                target="_blank"
+                rel="noopener noreferrer"
                 className="text-gray-300 hover:text-primary transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-gray-900 rounded"
-                aria-label="Ikuti kami di Facebook"
+                aria-label="Ikuti kami di TikTok"
               >
-                <Facebook size={24} />
+                <TikTokIcon size={24} />
               </a>
               <a
-                href="#"
+                href="https://www.instagram.com/disabilitasku/"
+                target="_blank"
+                rel="noopener noreferrer"
                 className="text-gray-300 hover:text-primary transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-gray-900 rounded"
                 aria-label="Ikuti kami di Instagram"
               >
                 <Instagram size={24} />
-              </a>
-              <a
-                href="#"
-                className="text-gray-300 hover:text-primary transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-gray-900 rounded"
-                aria-label="Ikuti kami di Twitter"
-              >
-                <Twitter size={24} />
               </a>
             </div>
           </div>
@@ -157,19 +160,21 @@ const Footer = () => {
               <div className="flex items-center text-gray-300">
                 <Mail size={16} className="mr-2 text-primary" aria-hidden="true" />
                 <a
-                  href="mailto:info@disabilitasku.id"
+                  href="mailto:bryanwahyukp95@gmail.com"
                   className="hover:text-primary transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-gray-900 rounded"
                 >
-                  info@disabilitasku.id
+                  bryanwahyukp95@gmail.com
                 </a>
               </div>
               <div className="flex items-center text-gray-300">
                 <Phone size={16} className="mr-2 text-primary" aria-hidden="true" />
                 <a
-                  href="tel:+62211234567"
+                  href="https://wa.me/628990076060"
+                  target="_blank"
+                  rel="noopener noreferrer"
                   className="hover:text-primary transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-gray-900 rounded"
                 >
-                  (021) 1234 5678
+                  +62 899 007 6060
                 </a>
               </div>
               <div className="flex items-start text-gray-300">
@@ -180,8 +185,63 @@ const Footer = () => {
           </div>
         </div>
 
-        {/* Bottom Section */}
+        {/* Tim Kami Section */}
         <div className="border-t border-gray-800 mt-12 pt-8">
+          <h4 className="font-semibold text-white mb-4">Tim Kami</h4>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* Bryan - Founder */}
+            <div>
+              <p className="text-gray-300 font-medium mb-2">Bryan Wahyu <span className="text-primary text-sm">(Founder)</span></p>
+              <div className="flex space-x-3">
+                <a
+                  href="https://www.facebook.com/bryan.wahyu/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-gray-300 hover:text-primary transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-gray-900 rounded"
+                  aria-label="Facebook Bryan Wahyu"
+                >
+                  <Facebook size={20} />
+                </a>
+                <a
+                  href="https://www.instagram.com/bryanwahyu/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-gray-300 hover:text-primary transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-gray-900 rounded"
+                  aria-label="Instagram Bryan Wahyu"
+                >
+                  <Instagram size={20} />
+                </a>
+                <a
+                  href="https://www.linkedin.com/in/bryan-wahyu-2b0360377/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-gray-300 hover:text-primary transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-gray-900 rounded"
+                  aria-label="LinkedIn Bryan Wahyu"
+                >
+                  <Linkedin size={20} />
+                </a>
+              </div>
+            </div>
+            {/* Awany */}
+            <div>
+              <p className="text-gray-300 font-medium mb-2">Awany Desyar</p>
+              <div className="flex space-x-3">
+                <a
+                  href="https://www.instagram.com/awanydesyar28/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-gray-300 hover:text-primary transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-gray-900 rounded"
+                  aria-label="Instagram Awany Desyar"
+                >
+                  <Instagram size={20} />
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Bottom Section */}
+        <div className="border-t border-gray-800 mt-8 pt-8">
           <div className="flex flex-col md:flex-row justify-between items-center">
             <div className="text-gray-400 text-sm mb-4 md:mb-0">
               © 2026 DisabilitasKu. Semua hak cipta dilindungi.
