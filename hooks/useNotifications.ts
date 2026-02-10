@@ -1,5 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { notificationService } from '@/lib/api';
+import { useCentrifugoContext } from '@/hooks/CentrifugoProvider';
+import { useAuth } from '@/hooks/useAuth';
 import type { Notification, NotificationStats, NotificationListParams } from '@/lib/api/types';
 
 interface NotificationState {
@@ -18,6 +20,9 @@ export const useNotifications = (autoFetch: boolean = true) => {
     isLoading: false,
     error: null,
   });
+
+  const centrifugo = useCentrifugoContext();
+  const { user } = useAuth();
 
   const fetchNotifications = useCallback(async (params?: NotificationListParams) => {
     setState(prev => ({ ...prev, isLoading: true, error: null }));
@@ -138,6 +143,31 @@ export const useNotifications = (autoFetch: boolean = true) => {
       fetchUnreadCount();
     }
   }, [autoFetch, fetchNotifications, fetchUnreadCount]);
+
+  // Real-time subscription via Centrifugo
+  useEffect(() => {
+    if (!centrifugo || !user) return;
+
+    const channel = `personal:#${user.id}`;
+    const sub = centrifugo.subscribe(channel, (ctx) => {
+      const data = ctx.data as { type?: string; payload?: any };
+      if (data?.type === 'notification' && data?.payload) {
+        const notif = data.payload as Notification;
+        setState(prev => ({
+          ...prev,
+          notifications: [notif, ...prev.notifications],
+          unreadCount: prev.unreadCount + 1,
+        }));
+      }
+    });
+
+    return () => {
+      if (sub) {
+        sub.removeAllListeners();
+        sub.unsubscribe();
+      }
+    };
+  }, [centrifugo, user]);
 
   return {
     ...state,

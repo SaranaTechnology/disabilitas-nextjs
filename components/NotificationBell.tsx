@@ -130,11 +130,9 @@ export const NotificationBell = () => {
     }
   }, [isOpen, fetchNotifications]);
 
-  // Fetch unread count periodically
+  // Fetch unread count once on mount (real-time updates via Centrifugo)
   useEffect(() => {
     fetchUnreadCount();
-    const interval = setInterval(fetchUnreadCount, 60000); // Every minute
-    return () => clearInterval(interval);
   }, [fetchUnreadCount]);
 
   const handleMarkAllRead = async () => {
