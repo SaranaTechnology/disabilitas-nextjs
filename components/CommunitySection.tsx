@@ -19,6 +19,7 @@ const CommunitySection = () => {
   const [forumTopics, setForumTopics] = useState<ForumThread[]>([]);
   const [upcomingEvents, setUpcomingEvents] = useState<Event[]>([]);
   const [loading, setLoading] = useState(true);
+  const [totals, setTotals] = useState({ forum: 0, events: 0, communities: 0, articles: 0 });
 
   useEffect(() => {
     fetchData();
@@ -26,10 +27,11 @@ const CommunitySection = () => {
 
   const fetchData = async () => {
     try {
-      // Fetch forum threads and events in parallel
-      const [forumRes, eventsRes] = await Promise.all([
+      const [forumRes, eventsRes, communitiesRes, articlesRes] = await Promise.all([
         apiClient.forum.listThreads(),
-        apiClient.events.list({ limit: 3 })
+        apiClient.events.list({ limit: 3 }),
+        apiClient.communities.list({ per_page: 1 }),
+        apiClient.public.articles.list({ limit: 1 }),
       ]);
 
       if (forumRes.data && Array.isArray(forumRes.data)) {
@@ -39,6 +41,13 @@ const CommunitySection = () => {
       if (eventsRes.data && Array.isArray(eventsRes.data)) {
         setUpcomingEvents(eventsRes.data);
       }
+
+      setTotals({
+        forum: forumRes.meta?.total ?? (Array.isArray(forumRes.data) ? forumRes.data.length : 0),
+        events: eventsRes.meta?.total ?? (Array.isArray(eventsRes.data) ? eventsRes.data.length : 0),
+        communities: communitiesRes.meta?.total ?? (Array.isArray(communitiesRes.data) ? communitiesRes.data.length : 0),
+        articles: articlesRes.meta?.total ?? 0,
+      });
     } catch (error) {
       console.error('Error fetching community data:', error);
     } finally {
@@ -92,10 +101,10 @@ const CommunitySection = () => {
   };
 
   const communityStats: CommunityStats[] = [
-    { label: 'Diskusi Forum', value: String(forumTopics.length || 0), icon: MessageCircle },
-    { label: 'Event Mendatang', value: String(upcomingEvents.length || 0), icon: Calendar },
-    { label: 'Komunitas Aktif', value: '1+', icon: Users },
-    { label: 'Cerita Inspiratif', value: '10+', icon: Heart }
+    { label: 'Diskusi Forum', value: String(totals.forum), icon: MessageCircle },
+    { label: 'Event', value: String(totals.events), icon: Calendar },
+    { label: 'Komunitas', value: String(totals.communities), icon: Users },
+    { label: 'Artikel', value: String(totals.articles), icon: Heart }
   ];
 
   return (

@@ -1,18 +1,44 @@
 'use client';
 
-
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { ArrowRight, Users, Headphones, Clock, Accessibility, Globe, Smartphone } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import { apiClient } from '@/lib/api/client';
 
 const HeroSection = () => {
   const router = useRouter();
+  const [stats, setStats] = useState([
+    { value: '-', label: 'Lokasi Terapi' },
+    { value: '-', label: 'Artikel' },
+    { value: '-', label: 'Diskusi Forum' },
+  ]);
 
-  const stats = [
-    { value: '1000+', label: 'Pengguna Aktif' },
-    { value: '50+', label: 'Layanan' },
-    { value: '24/7', label: 'Dukungan' },
-  ];
+  useEffect(() => {
+    const fetchStats = async () => {
+      try {
+        const [therapistsRes, articlesRes, forumRes] = await Promise.all([
+          apiClient.public.therapists.list({ page_size: 1 }),
+          apiClient.public.articles.list({ limit: 1 }),
+          apiClient.forum.listThreads(),
+        ]);
+
+        const therapistTotal = therapistsRes.meta?.total ?? 0;
+        const articleTotal = articlesRes.meta?.total ?? 0;
+        const forumTotal = forumRes.meta?.total ?? (Array.isArray(forumRes.data) ? forumRes.data.length : 0);
+
+        setStats([
+          { value: String(therapistTotal), label: 'Lokasi Terapi' },
+          { value: String(articleTotal), label: 'Artikel' },
+          { value: String(forumTotal), label: 'Diskusi Forum' },
+        ]);
+      } catch (error) {
+        console.error('Error fetching stats:', error);
+      }
+    };
+
+    fetchStats();
+  }, []);
 
   const features = [
     {
