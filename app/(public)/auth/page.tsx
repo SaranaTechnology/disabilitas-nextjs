@@ -11,6 +11,8 @@ import { apiClient } from '@/lib/api/client';
 import { toast } from 'sonner';
 import AdminSetup from '@/components/AdminSetup';
 import { User, Users, Stethoscope, UserCheck } from 'lucide-react';
+import { validatePassword } from '@/lib/validation';
+import type { RegisterCredentials, UserRole } from '@/lib/api/types';
 
 const ROLE_OPTIONS = [
   {
@@ -52,6 +54,7 @@ export default function AuthPage() {
   const [role, setRole] = useState('user_disabilitas');
   const [loading, setLoading] = useState(false);
   const [showAdminSetup, setShowAdminSetup] = useState(false);
+  const [passwordErrors, setPasswordErrors] = useState<string[]>([]);
   const router = useRouter();
 
   const selectedRole = ROLE_OPTIONS.find((r) => r.value === role);
@@ -103,17 +106,24 @@ export default function AuthPage() {
           router.refresh();
         }, 500);
       } else {
-        const signUpData: any = {
+        // Validate password strength
+        const pwResult = validatePassword(password);
+        if (!pwResult.valid) {
+          setPasswordErrors(pwResult.errors);
+          toast.error("Password tidak memenuhi syarat", {
+            description: pwResult.errors.join(', '),
+          });
+          return;
+        }
+        setPasswordErrors([]);
+
+        const signUpData: RegisterCredentials = {
           email,
           password,
           full_name: fullName,
-          role,
+          role: role as UserRole,
+          ...(selectedRole?.requiresParent ? { parent_name: parentName } : {}),
         };
-
-        // Only include parent_name if required for the role
-        if (selectedRole?.requiresParent) {
-          signUpData.parent_name = parentName;
-        }
 
         const response = await apiClient.auth.signUp(signUpData);
 
@@ -133,9 +143,10 @@ export default function AuthPage() {
           router.push('/');
         }
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : 'Terjadi kesalahan tidak diketahui';
       toast.error("Terjadi kesalahan", {
-        description: error.message,
+        description: message,
       });
     } finally {
       setLoading(false);
@@ -248,11 +259,29 @@ export default function AuthPage() {
               <Input
                 id="password"
                 type="password"
-                placeholder="Masukkan password"
+                placeholder={isLogin ? 'Masukkan password' : 'Min. 8 karakter, huruf besar, angka, spesial'}
                 value={password}
-                onChange={(e) => setPassword(e.target.value)}
+                onChange={(e) => {
+                  setPassword(e.target.value);
+                  if (!isLogin && e.target.value) {
+                    setPasswordErrors(validatePassword(e.target.value).errors);
+                  } else {
+                    setPasswordErrors([]);
+                  }
+                }}
                 required
+                aria-describedby={!isLogin && passwordErrors.length > 0 ? 'password-errors' : undefined}
               />
+              {!isLogin && password && passwordErrors.length > 0 && (
+                <ul id="password-errors" className="text-xs text-red-500 space-y-0.5 mt-1" role="alert">
+                  {passwordErrors.map((err) => (
+                    <li key={err}>• {err}</li>
+                  ))}
+                </ul>
+              )}
+              {!isLogin && password && passwordErrors.length === 0 && (
+                <p className="text-xs text-green-600 mt-1">Password memenuhi syarat</p>
+              )}
             </div>
 
             <Button

@@ -54,7 +54,7 @@ const TherapyLocationFinder = () => {
         throw new Error(response.error);
       }
 
-      const data = Array.isArray(response.data) ? response.data : [];
+      const data = Array.isArray(response.data) ? response.data as unknown as TherapyLocation[] : [];
       setLocations(data);
     } catch (error) {
       console.error('Error fetching locations:', error);

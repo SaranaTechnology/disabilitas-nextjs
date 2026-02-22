@@ -209,15 +209,24 @@ export default function FAQPage() {
                         className={`cursor-pointer transition-all ${
                           isOpen ? 'ring-2 ring-primary/20' : ''
                         }`}
+                        role="button"
+                        tabIndex={0}
+                        aria-expanded={isOpen}
                         onClick={() => toggleItem(currentIndex)}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter' || e.key === ' ') {
+                            e.preventDefault();
+                            toggleItem(currentIndex);
+                          }
+                        }}
                       >
                         <CardContent className="p-5">
                           <div className="flex items-start justify-between gap-4">
                             <h3 className="font-medium text-gray-900">{item.q}</h3>
                             {isOpen ? (
-                              <ChevronUp className="w-5 h-5 text-primary flex-shrink-0" />
+                              <ChevronUp className="w-5 h-5 text-primary flex-shrink-0" aria-hidden="true" />
                             ) : (
-                              <ChevronDown className="w-5 h-5 text-gray-400 flex-shrink-0" />
+                              <ChevronDown className="w-5 h-5 text-gray-400 flex-shrink-0" aria-hidden="true" />
                             )}
                           </div>
                           {isOpen && (

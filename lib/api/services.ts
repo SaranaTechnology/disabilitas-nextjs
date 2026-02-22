@@ -18,7 +18,7 @@ export const authService = {
     return await apiClient.auth.getSession();
   },
 
-  onAuthStateChange: (callback: (event: string, session: any) => void) => {
+  onAuthStateChange: (callback: (event: string, session: import('./types').Session | null) => void) => {
     return apiClient.auth.onAuthStateChange(callback);
   }
 };
@@ -87,7 +87,7 @@ export const therapyLocationService = {
     return await apiClient.public.therapyLocations.get(id);
   },
 
-  register: async (data: any) => {
+  register: async (data: import('./types').TherapyLocationRegister) => {
     return await apiClient.public.therapyLocationRegister.submit(data);
   }
 };
@@ -151,7 +151,7 @@ export const resourceService = {
 
 // Contact Service
 export const contactService = {
-  submit: async (data: any) => {
+  submit: async (data: import('./types').ContactMessageInsert) => {
     return await apiClient.public.contact.submit(data);
   }
 };

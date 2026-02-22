@@ -119,12 +119,15 @@ const ResourcesSection = () => {
         </div>
 
         {/* Tabs */}
-        <div className="flex flex-wrap justify-center gap-2 mb-8">
+        <div className="flex flex-wrap justify-center gap-2 mb-8" role="tablist" aria-label="Kategori sumber belajar">
           {tabs.map((tab) => {
             const IconComponent = tab.icon;
             return (
               <button
                 key={tab.id}
+                role="tab"
+                aria-selected={activeTab === tab.id}
+                aria-label={tab.label}
                 onClick={() => setActiveTab(tab.id)}
                 className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium text-sm transition-all ${
                   activeTab === tab.id
@@ -132,7 +135,7 @@ const ResourcesSection = () => {
                     : 'bg-gray-800 text-gray-300 hover:bg-gray-700'
                 }`}
               >
-                <IconComponent className="w-4 h-4" />
+                <IconComponent className="w-4 h-4" aria-hidden="true" />
                 <span className="hidden sm:inline">{tab.label}</span>
               </button>
             );

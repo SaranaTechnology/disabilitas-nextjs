@@ -1,16 +1,21 @@
 'use client';
 
 import { useState, useEffect, createContext, useContext, type ReactNode } from 'react';
-import { authService, type User } from '@/lib/api';
+import { authService, type User, type LoginCredentials, type RegisterCredentials } from '@/lib/api';
+
+interface AuthResult {
+  data?: { token: string; user: User } | null;
+  error?: string;
+}
 
 type AuthContextType = {
   user: User | null;
   loading: boolean;
   isLoading: boolean; // alias for backward-compat
   error: string | null;
-  signUp: (credentials: any) => Promise<any>;
-  signIn: (credentials: any) => Promise<any>;
-  signOut: () => Promise<any>;
+  signUp: (credentials: RegisterCredentials) => Promise<AuthResult>;
+  signIn: (credentials: LoginCredentials) => Promise<AuthResult>;
+  signOut: () => Promise<{ data: null; error: undefined }>;
   isAuthenticated: boolean;
 };
 
@@ -21,7 +26,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
-  const signUp = async (credentials: any) => {
+  const signUp = async (credentials: RegisterCredentials): Promise<AuthResult> => {
     setLoading(true); setError(null);
     try {
       const response = await authService.signUp(credentials);
@@ -31,12 +36,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       setUser(response.data?.user || null);
       setLoading(false);
       return response;
-    } catch (e: any) {
-      setError(e.message); setLoading(false); return { error: e.message };
+    } catch (e: unknown) {
+      const message = e instanceof Error ? e.message : 'Unknown error';
+      setError(message); setLoading(false); return { error: message };
     }
   };
 
-  const signIn = async (credentials: any) => {
+  const signIn = async (credentials: LoginCredentials): Promise<AuthResult> => {
     setLoading(true); setError(null);
     try {
       const response = await authService.signIn(credentials);
@@ -46,8 +52,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       setUser(response.data?.user || null);
       setLoading(false);
       return response;
-    } catch (e: any) {
-      setError(e.message); setLoading(false); return { error: e.message };
+    } catch (e: unknown) {
+      const message = e instanceof Error ? e.message : 'Unknown error';
+      setError(message); setLoading(false); return { error: message };
     }
   };
 
@@ -55,7 +62,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     setLoading(true); setError(null);
     try {
       await authService.signOut();
-    } catch (e: any) {
+    } catch (_e: unknown) {
       // Ignore errors on logout - we still want to clear user state
     }
     // Always clear user state on logout

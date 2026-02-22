@@ -227,7 +227,9 @@ export default function FeedbackPage() {
                           onClick={() => setRating(star)}
                           onMouseEnter={() => setHoverRating(star)}
                           onMouseLeave={() => setHoverRating(0)}
-                          className="focus:outline-none"
+                          className="focus:outline-none focus:ring-2 focus:ring-primary rounded"
+                          aria-label={`Beri rating ${star} dari 5`}
+                          aria-pressed={star <= rating}
                         >
                           <Star
                             className={`w-8 h-8 transition-colors ${
@@ -235,6 +237,7 @@ export default function FeedbackPage() {
                                 ? 'text-yellow-400 fill-yellow-400'
                                 : 'text-gray-300'
                             }`}
+                            aria-hidden="true"
                           />
                         </button>
                       ))}

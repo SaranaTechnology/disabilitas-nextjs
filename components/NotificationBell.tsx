@@ -89,6 +89,7 @@ const NotificationItem = ({
               onMarkRead(notification.id);
             }}
             title="Tandai sudah dibaca"
+            aria-label="Tandai notifikasi sudah dibaca"
           >
             <Check className="h-3 w-3" />
           </Button>
@@ -102,6 +103,7 @@ const NotificationItem = ({
             onDelete(notification.id);
           }}
           title="Hapus"
+          aria-label="Hapus notifikasi"
         >
           <Trash2 className="h-3 w-3" />
         </Button>
@@ -142,7 +144,7 @@ export const NotificationBell = () => {
   return (
     <DropdownMenu open={isOpen} onOpenChange={setIsOpen}>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" size="icon" className="relative">
+        <Button variant="ghost" size="icon" className="relative" aria-label={unreadCount > 0 ? `Notifikasi, ${unreadCount} belum dibaca` : 'Notifikasi'}>
           <Bell className="h-5 w-5" />
           {unreadCount > 0 && (
             <Badge

@@ -2,6 +2,7 @@
 
 
 import React, { useState, useEffect, useRef } from 'react';
+import DOMPurify from 'isomorphic-dompurify';
 import { apiClient } from '@/lib/api/client';
 import type { ArticleSummary, ArticleInsert, Article } from '@/lib/api/types';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -77,8 +78,12 @@ const ArticleManager = () => {
     e.preventDefault();
 
     try {
-      // Get content from contentEditable div
-      const content = editorRef.current?.innerHTML || formData.content;
+      // Get content from contentEditable div and sanitize
+      const rawContent = editorRef.current?.innerHTML || formData.content;
+      const content = DOMPurify.sanitize(rawContent, {
+        ALLOWED_TAGS: ['p', 'br', 'b', 'i', 'u', 'strong', 'em', 'a', 'ul', 'ol', 'li', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'blockquote', 'img', 'figure', 'figcaption', 'pre', 'code', 'span', 'div', 'table', 'thead', 'tbody', 'tr', 'th', 'td'],
+        ALLOWED_ATTR: ['href', 'target', 'rel', 'src', 'alt', 'width', 'height', 'class', 'id'],
+      });
 
       const articleData = {
         ...formData,
@@ -345,38 +350,39 @@ const ArticleManager = () => {
                   <div>
                     <Label>Konten Artikel</Label>
                     {/* Toolbar */}
-                    <div className="flex flex-wrap gap-1 p-2 border border-b-0 rounded-t-md bg-gray-50">
-                      <Button type="button" size="sm" variant="ghost" onClick={() => execCommand('bold')}>
+                    <div className="flex flex-wrap gap-1 p-2 border border-b-0 rounded-t-md bg-gray-50" role="toolbar" aria-label="Format teks">
+                      <Button type="button" size="sm" variant="ghost" onClick={() => execCommand('bold')} aria-label="Tebal">
                         <strong>B</strong>
                       </Button>
-                      <Button type="button" size="sm" variant="ghost" onClick={() => execCommand('italic')}>
+                      <Button type="button" size="sm" variant="ghost" onClick={() => execCommand('italic')} aria-label="Miring">
                         <em>I</em>
                       </Button>
-                      <Button type="button" size="sm" variant="ghost" onClick={() => execCommand('underline')}>
+                      <Button type="button" size="sm" variant="ghost" onClick={() => execCommand('underline')} aria-label="Garis bawah">
                         <u>U</u>
                       </Button>
-                      <div className="w-px bg-gray-300 mx-1" />
-                      <Button type="button" size="sm" variant="ghost" onClick={() => execCommand('formatBlock', 'h2')}>
+                      <div className="w-px bg-gray-300 mx-1" role="separator" />
+                      <Button type="button" size="sm" variant="ghost" onClick={() => execCommand('formatBlock', 'h2')} aria-label="Heading 2">
                         H2
                       </Button>
-                      <Button type="button" size="sm" variant="ghost" onClick={() => execCommand('formatBlock', 'h3')}>
+                      <Button type="button" size="sm" variant="ghost" onClick={() => execCommand('formatBlock', 'h3')} aria-label="Heading 3">
                         H3
                       </Button>
-                      <Button type="button" size="sm" variant="ghost" onClick={() => execCommand('formatBlock', 'p')}>
+                      <Button type="button" size="sm" variant="ghost" onClick={() => execCommand('formatBlock', 'p')} aria-label="Paragraf">
                         P
                       </Button>
-                      <div className="w-px bg-gray-300 mx-1" />
-                      <Button type="button" size="sm" variant="ghost" onClick={() => execCommand('insertUnorderedList')}>
+                      <div className="w-px bg-gray-300 mx-1" role="separator" />
+                      <Button type="button" size="sm" variant="ghost" onClick={() => execCommand('insertUnorderedList')} aria-label="Daftar tak berurut">
                         UL
                       </Button>
-                      <Button type="button" size="sm" variant="ghost" onClick={() => execCommand('insertOrderedList')}>
+                      <Button type="button" size="sm" variant="ghost" onClick={() => execCommand('insertOrderedList')} aria-label="Daftar berurut">
                         OL
                       </Button>
-                      <div className="w-px bg-gray-300 mx-1" />
+                      <div className="w-px bg-gray-300 mx-1" role="separator" />
                       <Button
                         type="button"
                         size="sm"
                         variant="ghost"
+                        aria-label="Tambah link"
                         onClick={() => {
                           const url = prompt('Masukkan URL link:');
                           if (url) execCommand('createLink', url);
@@ -389,6 +395,9 @@ const ArticleManager = () => {
                     <div
                       ref={editorRef}
                       contentEditable
+                      role="textbox"
+                      aria-label="Konten artikel"
+                      aria-multiline="true"
                       className="min-h-[300px] p-4 border rounded-b-md focus:outline-none focus:ring-2 focus:ring-primary prose prose-sm max-w-none"
                       style={{ backgroundColor: 'white' }}
                       dangerouslySetInnerHTML={{ __html: formData.content || '' }}

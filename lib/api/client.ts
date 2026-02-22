@@ -5,6 +5,7 @@ import type {
   AuthResponse,
   LoginCredentials,
   RegisterCredentials,
+  Therapist,
   Appointment,
   AppointmentInsert,
   AppointmentUpdate,
@@ -45,6 +46,141 @@ import type {
   PasswordResetValidate,
   PasswordReset
 } from './types';
+
+/** Shape returned by the /me endpoint (PascalCase or snake_case from Go backend) */
+interface RawMeResponse {
+  ID?: string;
+  id?: string;
+  user_id?: string;
+  Email?: string;
+  email?: string;
+  Role?: string;
+  role?: string;
+  Profile?: { FullName?: string; full_name?: string };
+  profile?: { full_name?: string };
+  full_name?: string;
+  FullName?: string;
+}
+
+/** Shape returned by raw event from API (PascalCase or snake_case) */
+interface RawEvent {
+  ID?: string;
+  id?: string;
+  Title?: string;
+  title?: string;
+  Mode?: string;
+  mode?: string;
+  StartAt?: string;
+  start_at?: string;
+  EndAt?: string;
+  end_at?: string;
+  HostUserID?: string;
+  host_user_id?: string;
+  CommunityID?: string;
+  community_id?: string;
+  Capacity?: number;
+  capacity?: number;
+  Location?: string;
+  location?: string;
+  JoinURL?: string;
+  join_url?: string;
+  HostURL?: string;
+  host_url?: string;
+  Status?: string;
+  status?: string;
+  PublishedAt?: string;
+  published_at?: string;
+  CreatedAt?: string;
+  created_at?: string;
+  UpdatedAt?: string;
+  updated_at?: string;
+}
+
+/** Shape returned by raw community from API (PascalCase or snake_case) */
+interface RawCommunity {
+  ID?: string;
+  id?: string;
+  Name?: string;
+  name?: string;
+  Description?: string;
+  description?: string;
+  Tags?: string;
+  tags?: string;
+  IsPrivate?: boolean;
+  is_private?: boolean;
+  CreatedBy?: string;
+  created_by?: string;
+  CreatedAt?: string;
+  created_at?: string;
+}
+
+/** Shape returned by raw user from API (PascalCase or snake_case) */
+interface RawUser {
+  ID?: string;
+  id?: string;
+  user_id?: string;
+  Email?: string;
+  email?: string;
+  Role?: string;
+  role?: string;
+  FullName?: string;
+  full_name?: string;
+  name?: string;
+  Phone?: string;
+  phone?: string;
+  Address?: string;
+  address?: string;
+  City?: string;
+  city?: string;
+  DateOfBirth?: string;
+  date_of_birth?: string;
+  Gender?: string;
+  gender?: string;
+  AvatarURL?: string;
+  avatar_url?: string;
+  CreatedAt?: string;
+  created_at?: string;
+  UpdatedAt?: string;
+  updated_at?: string;
+  Profile?: {
+    FullName?: string;
+    full_name?: string;
+    Phone?: string;
+    phone?: string;
+    Address?: string;
+    address?: string;
+    City?: string;
+    city?: string;
+    DateOfBirth?: string;
+    date_of_birth?: string;
+    Gender?: string;
+    gender?: string;
+    AvatarURL?: string;
+    avatar_url?: string;
+  };
+  profile?: {
+    full_name?: string;
+    phone?: string;
+    address?: string;
+    city?: string;
+    date_of_birth?: string;
+    gender?: string;
+    avatar_url?: string;
+  };
+}
+
+/** Auth response shape: success path for signUp/signIn */
+interface AuthSuccessResult {
+  data: { token: string; user: User };
+  error: undefined;
+}
+
+/** Auth response shape: error path for signUp/signIn */
+interface AuthErrorResult {
+  data: null;
+  error: string;
+  status?: number;
+}
 
 class ApiClient {
   private baseUrl: string;
@@ -162,7 +298,7 @@ class ApiClient {
 
   // Auth methods
   auth = {
-    signUp: async (credentials: RegisterCredentials) => {
+    signUp: async (credentials: RegisterCredentials): Promise<AuthSuccessResult | AuthErrorResult> => {
       const response = await this.makeRequest<{ access_token: string; refresh_token: string; user: User }>('/auth/register', {
         method: 'POST',
         body: JSON.stringify(credentials),
@@ -174,10 +310,10 @@ class ApiClient {
         return { data: { token: response.data.access_token, user: response.data.user }, error: undefined };
       }
 
-      return response as any;
+      return { data: null, error: response.error || 'Registration failed', status: response.status };
     },
 
-    signInWithPassword: async (credentials: LoginCredentials) => {
+    signInWithPassword: async (credentials: LoginCredentials): Promise<AuthSuccessResult | AuthErrorResult> => {
       const response = await this.makeRequest<{ access_token: string; refresh_token: string }>('/auth/login', {
         method: 'POST',
         body: JSON.stringify(credentials),
@@ -187,7 +323,7 @@ class ApiClient {
         this.setAuthToken(response.data.access_token);
 
         // Fetch user info from /me endpoint
-        const meResponse = await this.makeRequest<any>('/me');
+        const meResponse = await this.makeRequest<RawMeResponse>('/me');
         const user: User = {
           id: meResponse.data?.ID || meResponse.data?.id || meResponse.data?.user_id || '',
           email: meResponse.data?.Email || meResponse.data?.email || credentials.email,
@@ -198,7 +334,7 @@ class ApiClient {
         return { data: { token: response.data.access_token, user }, error: undefined };
       }
 
-      return response as any;
+      return { data: null, error: response.error || 'Login failed', status: response.status };
     },
 
     signOut: async () => {
@@ -206,10 +342,10 @@ class ApiClient {
       this.clearAllTokens();
 
       try {
-        await this.makeRequest('/auth/logout', {
+        await this.makeRequest<void>('/auth/logout', {
           method: 'POST',
         });
-      } catch (e) {
+      } catch (_e: unknown) {
         // Ignore API errors on logout - tokens are already cleared
       }
 
@@ -223,7 +359,7 @@ class ApiClient {
 
       try {
         // Get user info from /me endpoint
-        const response = await this.makeRequest<any>('/me');
+        const response = await this.makeRequest<RawMeResponse>('/me');
         if (response.error || !response.data) {
           this.removeAuthToken();
           return { data: { session: null } };
@@ -242,7 +378,7 @@ class ApiClient {
         };
 
         return { data: { session } };
-      } catch (e) {
+      } catch (_e: unknown) {
         this.removeAuthToken();
         return { data: { session: null } };
       }
@@ -312,10 +448,10 @@ class ApiClient {
         if (params.location) qs.set('city_code', params.location);
         if (params.page_size) qs.set('limit', String(params.page_size));
         const suffix = qs.toString() ? `?${qs.toString()}` : '';
-        return await this.makeRequest(`/public/therapists${suffix}`);
+        return await this.makeRequest<Therapist[]>(`/public/therapists${suffix}`);
       },
       fetchCursor: async (cursorUrl: string) => {
-        return await this.fetchUrl(cursorUrl);
+        return await this.fetchUrl<Therapist[]>(cursorUrl);
       }
     },
     resources: {
@@ -638,7 +774,7 @@ class ApiClient {
   // User methods
   users = {
     get: async (id: string) => {
-      const response = await this.makeRequest<any>(`/users/${id}`);
+      const response = await this.makeRequest<RawUser>(`/users/${id}`);
       if (response.data) {
         return { ...response, data: this.transformUser(response.data) };
       }
@@ -646,7 +782,7 @@ class ApiClient {
     },
 
     getCurrent: async () => {
-      const response = await this.makeRequest<any>('/user');
+      const response = await this.makeRequest<RawUser>('/user');
       if (response.data) {
         return { ...response, data: this.transformUser(response.data) };
       }
@@ -654,7 +790,7 @@ class ApiClient {
     },
 
     update: async (id: string, data: ProfileUpdate) => {
-      const response = await this.makeRequest<any>(`/users/${id}`, {
+      const response = await this.makeRequest<RawUser>(`/users/${id}`, {
         method: 'PUT',
         body: JSON.stringify(data),
       });
@@ -737,54 +873,54 @@ class ApiClient {
   };
 
   // Helper to transform PascalCase to snake_case for event data
-  private transformEvent(e: any): Event {
+  private transformEvent(e: RawEvent): Event {
     return {
-      id: e.ID || e.id,
-      title: e.Title || e.title,
-      mode: (e.Mode || e.mode || 'online').toLowerCase(),
-      start_at: e.StartAt || e.start_at,
-      end_at: e.EndAt || e.end_at,
+      id: e.ID || e.id || '',
+      title: e.Title || e.title || '',
+      mode: (e.Mode || e.mode || 'online').toLowerCase() as Event['mode'],
+      start_at: e.StartAt || e.start_at || '',
+      end_at: e.EndAt || e.end_at || '',
       host_user_id: e.HostUserID || e.host_user_id,
       community_id: e.CommunityID || e.community_id,
       capacity: e.Capacity || e.capacity,
       location: e.Location || e.location,
       join_url: e.JoinURL || e.join_url,
       host_url: e.HostURL || e.host_url,
-      status: (e.Status || e.status || 'published') as any,
+      status: (e.Status || e.status || 'published') as Event['status'],
       published_at: e.PublishedAt || e.published_at,
-      created_at: e.CreatedAt || e.created_at,
-      updated_at: e.UpdatedAt || e.updated_at,
+      created_at: e.CreatedAt || e.created_at || '',
+      updated_at: e.UpdatedAt || e.updated_at || '',
     };
   }
 
   // Helper to transform PascalCase to snake_case for community data
-  private transformCommunity(c: any): Community {
+  private transformCommunity(c: RawCommunity): Community {
     return {
-      id: c.ID || c.id,
-      name: c.Name || c.name,
+      id: c.ID || c.id || '',
+      name: c.Name || c.name || '',
       description: c.Description || c.description,
       tags: c.Tags || c.tags,
       is_private: c.IsPrivate || c.is_private || false,
       created_by: c.CreatedBy || c.created_by,
-      created_at: c.CreatedAt || c.created_at,
+      created_at: c.CreatedAt || c.created_at || '',
     };
   }
 
   // Helper to transform PascalCase to snake_case for user data
-  private transformUser(u: any): User {
-    const profile = u.Profile || u.profile || {};
+  private transformUser(u: RawUser): User {
+    const p = (u.Profile || u.profile || {}) as Record<string, string | undefined>;
     return {
       id: u.ID || u.id || u.user_id || '',
       email: u.Email || u.email || '',
       role: u.Role || u.role || 'user_disabilitas',
-      full_name: profile.FullName || profile.full_name || u.FullName || u.full_name || u.name,
-      name: profile.FullName || profile.full_name || u.FullName || u.full_name || u.name,
-      phone: profile.Phone || profile.phone || u.Phone || u.phone,
-      address: profile.Address || profile.address || u.Address || u.address,
-      city: profile.City || profile.city || u.City || u.city,
-      date_of_birth: profile.DateOfBirth || profile.date_of_birth || u.DateOfBirth || u.date_of_birth,
-      gender: profile.Gender || profile.gender || u.Gender || u.gender,
-      avatar_url: profile.AvatarURL || profile.avatar_url || u.AvatarURL || u.avatar_url,
+      full_name: p.FullName || p.full_name || u.FullName || u.full_name || u.name,
+      name: p.FullName || p.full_name || u.FullName || u.full_name || u.name,
+      phone: p.Phone || p.phone || u.Phone || u.phone,
+      address: p.Address || p.address || u.Address || u.address,
+      city: p.City || p.city || u.City || u.city,
+      date_of_birth: p.DateOfBirth || p.date_of_birth || u.DateOfBirth || u.date_of_birth,
+      gender: p.Gender || p.gender || u.Gender || u.gender,
+      avatar_url: p.AvatarURL || p.avatar_url || u.AvatarURL || u.avatar_url,
       created_at: u.CreatedAt || u.created_at,
       updated_at: u.UpdatedAt || u.updated_at,
     };
@@ -797,14 +933,14 @@ class ApiClient {
       if (params.limit) qs.set('limit', String(params.limit));
       if (params.offset) qs.set('offset', String(params.offset));
       const suffix = qs.toString() ? `?${qs.toString()}` : '';
-      const response = await this.makeRequest<any[]>(`/events${suffix}`);
+      const response = await this.makeRequest<RawEvent[]>(`/events${suffix}`);
       if (response.data && Array.isArray(response.data)) {
         return { ...response, data: response.data.map(e => this.transformEvent(e)) };
       }
       return response as ApiResponse<Event[]>;
     },
     get: async (id: string) => {
-      const response = await this.makeRequest<any>(`/events/${id}`);
+      const response = await this.makeRequest<RawEvent>(`/events/${id}`);
       if (response.data) {
         return { ...response, data: this.transformEvent(response.data) };
       }
@@ -831,14 +967,14 @@ class ApiClient {
       if (params.limit) qs.set('limit', String(params.limit));
       if (params.offset) qs.set('offset', String(params.offset));
       const suffix = qs.toString() ? `?${qs.toString()}` : '';
-      const response = await this.makeRequest<any[]>(`/admin/events${suffix}`);
+      const response = await this.makeRequest<RawEvent[]>(`/admin/events${suffix}`);
       if (response.data && Array.isArray(response.data)) {
         return { ...response, data: response.data.map(e => this.transformEvent(e)) };
       }
       return response as ApiResponse<Event[]>;
     },
     get: async (id: string) => {
-      const response = await this.makeRequest<any>(`/admin/events/${id}`);
+      const response = await this.makeRequest<RawEvent>(`/admin/events/${id}`);
       if (response.data) {
         return { ...response, data: this.transformEvent(response.data) };
       }
@@ -919,14 +1055,14 @@ class ApiClient {
       if (params.page) qs.set('page', String(params.page));
       if (params.per_page) qs.set('per_page', String(params.per_page));
       const suffix = qs.toString() ? `?${qs.toString()}` : '';
-      const response = await this.makeRequest<any[]>(`/communities${suffix}`);
+      const response = await this.makeRequest<RawCommunity[]>(`/communities${suffix}`);
       if (response.data && Array.isArray(response.data)) {
         return { ...response, data: response.data.map(c => this.transformCommunity(c)) };
       }
       return response as ApiResponse<Community[]>;
     },
     get: async (id: string) => {
-      const response = await this.makeRequest<any>(`/communities/${id}`);
+      const response = await this.makeRequest<RawCommunity>(`/communities/${id}`);
       if (response.data) {
         return { ...response, data: this.transformCommunity(response.data) };
       }
@@ -968,21 +1104,21 @@ class ApiClient {
   // Database-like methods (kept for backward compatibility)
   from = (table: string) => ({
     select: (columns?: string) => ({
-      eq: (column: string, value: any) => this.makeRequest(`/${table}?${column}=${encodeURIComponent(value)}&select=${columns || '*'}`),
-      execute: () => this.makeRequest(`/${table}?select=${columns || '*'}`)
+      eq: (column: string, value: string | number | boolean) => this.makeRequest<unknown>(`/${table}?${column}=${encodeURIComponent(String(value))}&select=${columns || '*'}`),
+      execute: () => this.makeRequest<unknown>(`/${table}?select=${columns || '*'}`)
     }),
-    insert: (data: any) => this.makeRequest(`/${table}`, {
+    insert: (data: Record<string, unknown>) => this.makeRequest<unknown>(`/${table}`, {
       method: 'POST',
       body: JSON.stringify(data),
     }),
-    update: (data: any) => ({
-      eq: (column: string, value: any) => this.makeRequest(`/${table}/${encodeURIComponent(value)}`, {
+    update: (data: Record<string, unknown>) => ({
+      eq: (column: string, value: string | number | boolean) => this.makeRequest<unknown>(`/${table}/${encodeURIComponent(String(value))}`, {
         method: 'PUT',
         body: JSON.stringify(data),
       })
     }),
     delete: () => ({
-      eq: (column: string, value: any) => this.makeRequest(`/${table}/${encodeURIComponent(value)}`, {
+      eq: (column: string, value: string | number | boolean) => this.makeRequest<void>(`/${table}/${encodeURIComponent(String(value))}`, {
         method: 'DELETE',
       })
     })

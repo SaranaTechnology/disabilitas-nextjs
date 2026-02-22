@@ -1,10 +1,18 @@
 // API Response Types
-export interface ApiResponse<T = any> {
+export interface PaginationMeta {
+  total?: number;
+  page?: number;
+  limit?: number;
+  next_cursor?: string;
+  prev_cursor?: string;
+}
+
+export interface ApiResponse<T = unknown> {
   data: T;
   error?: string;
   message?: string;
   status?: number;
-  meta?: any;
+  meta?: PaginationMeta;
 }
 
 export interface PaginatedResponse<T> {
