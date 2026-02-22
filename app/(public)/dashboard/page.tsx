@@ -385,7 +385,7 @@ function TherapistAppointmentCard({
   onConfirm?: () => void;
   onComplete?: () => void;
   onCancel?: () => void;
-  getStatusBadge: (status: string) => JSX.Element;
+  getStatusBadge: (status: string) => React.ReactNode;
   formatDate: (date: string) => string;
   formatTime: (date: string) => string;
 }) {

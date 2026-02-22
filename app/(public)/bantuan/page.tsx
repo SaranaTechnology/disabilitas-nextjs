@@ -54,9 +54,9 @@ export default function PusatBantuanPage() {
       icon: Mail,
       title: 'Email',
       description: 'Kirim email ke tim support kami',
-      action: 'support@disabilitasku.id',
+      action: 'bryanwahyukp95@gmail.com',
       buttonText: 'Kirim Email',
-      onClick: () => window.location.href = 'mailto:support@disabilitasku.id',
+      onClick: () => window.location.href = 'mailto:bryanwahyukp95@gmail.com',
     },
     {
       icon: MessageCircle,

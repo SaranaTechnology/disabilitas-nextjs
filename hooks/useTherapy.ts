@@ -19,18 +19,19 @@ export const useTherapy = () => {
     try {
       const response = await therapyService.getTherapies();
       if (response.error) {
-        setTherapyState(prev => ({ ...prev, isLoading: false, error: response.error }));
+        setTherapyState(prev => ({ ...prev, isLoading: false, error: response.error ?? null }));
         return { error: response.error };
       }
-      setTherapyState(prev => ({ 
-        ...prev, 
-        isLoading: false, 
-        therapies: response.data || [] 
+      setTherapyState(prev => ({
+        ...prev,
+        isLoading: false,
+        therapies: Array.isArray(response.data) ? response.data : []
       }));
       return response;
-    } catch (error: any) {
-      setTherapyState(prev => ({ ...prev, isLoading: false, error: error.message }));
-      return { error: error.message };
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : 'Unknown error';
+      setTherapyState(prev => ({ ...prev, isLoading: false, error: message }));
+      return { error: message };
     }
   };
 
@@ -39,18 +40,19 @@ export const useTherapy = () => {
     try {
       const response = await therapyService.getTherapy(id);
       if (response.error) {
-        setTherapyState(prev => ({ ...prev, isLoading: false, error: response.error }));
+        setTherapyState(prev => ({ ...prev, isLoading: false, error: response.error ?? null }));
         return { error: response.error };
       }
-      setTherapyState(prev => ({ 
-        ...prev, 
-        isLoading: false, 
-        therapies: response.data ? [response.data] : [] 
+      setTherapyState(prev => ({
+        ...prev,
+        isLoading: false,
+        therapies: response.data ? [response.data] : []
       }));
       return response;
-    } catch (error: any) {
-      setTherapyState(prev => ({ ...prev, isLoading: false, error: error.message }));
-      return { error: error.message };
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : 'Unknown error';
+      setTherapyState(prev => ({ ...prev, isLoading: false, error: message }));
+      return { error: message };
     }
   };
 

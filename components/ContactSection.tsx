@@ -25,15 +25,17 @@ const ContactSection = () => {
   const contactInfo = [
     {
       icon: Phone,
-      title: 'Telepon',
-      value: '(021) 1234 5678',
-      subtitle: '24/7',
+      title: 'WhatsApp',
+      value: '+62 899 007 6060',
+      subtitle: 'Senin - Jumat, 09:00 - 17:00 WIB',
+      href: 'https://wa.me/628990076060',
     },
     {
       icon: Mail,
       title: 'Email',
-      value: 'info@disabilitasku.id',
-      subtitle: 'Waktu respon: 1 jam',
+      value: 'bryanwahyukp95@gmail.com',
+      subtitle: 'Waktu respon: 1x24 jam',
+      href: 'mailto:bryanwahyukp95@gmail.com',
     },
   ];
 
@@ -120,7 +122,13 @@ const ContactSection = () => {
                     </div>
                     <div>
                       <h4 className="font-semibold text-gray-900">{item.title}</h4>
-                      <p className="text-primary font-medium">{item.value}</p>
+                      {'href' in item && item.href ? (
+                        <a href={item.href} target="_blank" rel="noopener noreferrer" className="text-primary font-medium hover:underline">
+                          {item.value}
+                        </a>
+                      ) : (
+                        <p className="text-primary font-medium">{item.value}</p>
+                      )}
                       <p className="text-sm text-gray-500">{item.subtitle}</p>
                     </div>
                   </div>

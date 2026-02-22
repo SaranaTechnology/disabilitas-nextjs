@@ -7,6 +7,7 @@ export const AppointmentForm = () => {
     user_id: '',
     therapist_id: '',
     appointment_date: '',
+    method: 'zoom' as 'zoom' | 'meet' | 'call',
     notes: '',
     status: 'scheduled'
   });

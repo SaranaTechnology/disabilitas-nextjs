@@ -180,7 +180,7 @@ export default function KeamananPrivasiPage() {
               Jika Anda memiliki pertanyaan tentang keamanan dan privasi data Anda, jangan ragu untuk menghubungi kami.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Button onClick={() => window.location.href = 'mailto:support@disabilitasku.id'} size="lg">
+              <Button onClick={() => window.location.href = 'mailto:bryanwahyukp95@gmail.com'} size="lg">
                 Hubungi Kami
               </Button>
               <Button variant="outline" onClick={() => router.push('/tentang')} size="lg">

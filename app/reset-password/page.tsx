@@ -111,8 +111,7 @@ function PasswordResetContent() {
     try {
       const response = await apiClient.auth.resetPassword({
         token: token!,
-        password,
-        password_confirmation: passwordConfirmation,
+        new_password: password,
       });
       if (response.error) {
         throw new Error(response.error);

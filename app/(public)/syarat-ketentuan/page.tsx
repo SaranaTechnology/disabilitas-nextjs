@@ -104,7 +104,7 @@ export default function SyaratKetentuanPage() {
       content: `
         <p>Jika Anda memiliki pertanyaan tentang syarat dan ketentuan ini, silakan hubungi kami melalui:</p>
         <ul>
-          <li>Email: support@disabilitasku.id</li>
+          <li>Email: bryanwahyukp95@gmail.com</li>
           <li>Halaman Kontak di website kami</li>
         </ul>
       `,

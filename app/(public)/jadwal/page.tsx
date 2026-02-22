@@ -304,8 +304,8 @@ function AppointmentCard({
   appointment: Appointment;
   isPast?: boolean;
   onCancel?: () => void;
-  getStatusBadge: (status: string) => JSX.Element;
-  getMethodIcon: (method: string) => JSX.Element;
+  getStatusBadge: (status: string) => React.ReactNode;
+  getMethodIcon: (method: string) => React.ReactNode;
   formatDate: (date: string) => string;
   formatTime: (date: string) => string;
 }) {
