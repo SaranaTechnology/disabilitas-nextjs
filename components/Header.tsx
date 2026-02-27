@@ -1,8 +1,8 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
-import { Menu, X, Shield, LogOut, User, Calendar, LayoutDashboard } from 'lucide-react';
+import { Menu, X, Shield, LogOut, User, Calendar, LayoutDashboard, ChevronDown, Hand, Eye, Sparkles } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
@@ -13,6 +13,8 @@ const Header = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
   const [isTherapist, setIsTherapist] = useState(false);
+  const [isAIOpen, setIsAIOpen] = useState(false);
+  const aiDropdownRef = useRef<HTMLDivElement>(null);
   const { user, signOut } = useAuth();
   const router = useRouter();
 
@@ -43,6 +45,16 @@ const Header = () => {
     };
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (aiDropdownRef.current && !aiDropdownRef.current.contains(e.target as Node)) {
+        setIsAIOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
   return (
@@ -88,6 +100,37 @@ const Header = () => {
             >
               Forum
             </Link>
+            {/* AI Asisten Dropdown */}
+            <div className="relative" ref={aiDropdownRef}>
+              <button
+                onClick={() => setIsAIOpen(!isAIOpen)}
+                className="flex items-center gap-1 text-gray-600 hover:text-primary px-4 py-2 text-sm font-medium transition-colors duration-200 rounded-md hover:bg-primary/5"
+              >
+                <Sparkles className="w-4 h-4" />
+                AI Asisten
+                <ChevronDown className={`w-3.5 h-3.5 transition-transform ${isAIOpen ? 'rotate-180' : ''}`} />
+              </button>
+              {isAIOpen && (
+                <div className="absolute top-full left-0 mt-1 w-52 bg-white rounded-lg shadow-lg border py-1 z-50">
+                  <Link
+                    href="/isyarat"
+                    className="flex items-center gap-2.5 px-4 py-2.5 text-sm text-gray-700 hover:bg-primary/5 hover:text-primary transition-colors"
+                    onClick={() => setIsAIOpen(false)}
+                  >
+                    <Hand className="w-4 h-4 text-indigo-500" />
+                    Isyarat AI
+                  </Link>
+                  <Link
+                    href="/mata"
+                    className="flex items-center gap-2.5 px-4 py-2.5 text-sm text-gray-700 hover:bg-primary/5 hover:text-primary transition-colors"
+                    onClick={() => setIsAIOpen(false)}
+                  >
+                    <Eye className="w-4 h-4 text-cyan-500" />
+                    Vision AI
+                  </Link>
+                </div>
+              )}
+            </div>
             {user && !isTherapist && (
               <Link
                 href="/jadwal"
@@ -198,6 +241,29 @@ const Header = () => {
                 onClick={() => setIsMenuOpen(false)}
               >
                 Forum
+              </Link>
+              {/* AI Asisten - Mobile */}
+              <div className="px-4 pt-3 pb-1">
+                <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider flex items-center gap-1.5">
+                  <Sparkles className="w-3.5 h-3.5" />
+                  AI Asisten
+                </p>
+              </div>
+              <Link
+                href="/isyarat"
+                className="text-gray-600 hover:text-primary hover:bg-primary/5 flex items-center gap-2 px-4 py-3 text-base font-medium rounded-md transition-colors ml-2"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                <Hand className="w-4 h-4 text-indigo-500" />
+                Isyarat AI
+              </Link>
+              <Link
+                href="/mata"
+                className="text-gray-600 hover:text-primary hover:bg-primary/5 flex items-center gap-2 px-4 py-3 text-base font-medium rounded-md transition-colors ml-2"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                <Eye className="w-4 h-4 text-cyan-500" />
+                Vision AI
               </Link>
               {user && !isTherapist && (
                 <Link

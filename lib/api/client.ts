@@ -44,7 +44,13 @@ import type {
   CommunityListParams,
   PasswordResetRequest,
   PasswordResetValidate,
-  PasswordReset
+  PasswordReset,
+  SignRecognitionResult,
+  DictionaryEntry,
+  ObjectDetectionResult,
+  OCRResult,
+  SceneDescription,
+  AIHealthStatus
 } from './types';
 
 /** Shape returned by the /me endpoint (PascalCase or snake_case from Go backend) */
@@ -1123,6 +1129,151 @@ class ApiClient {
       })
     })
   });
+
+  private async makeFormDataRequest<T>(
+    endpoint: string,
+    formData: FormData
+  ): Promise<ApiResponse<T>> {
+    const url = `${this.baseUrl}${endpoint}`;
+
+    try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 60000); // 60s for AI
+
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: {
+          ...(this.authToken && { Authorization: `Bearer ${this.authToken}` }),
+        },
+        body: formData,
+        signal: controller.signal,
+      });
+
+      clearTimeout(timeoutId);
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({ error: response.statusText }));
+        return { data: null as unknown as T, error: errorData.error || errorData.message || response.statusText, status: response.status };
+      }
+
+      const contentType = response.headers.get('Content-Type') || '';
+
+      // Handle audio response (TTS returns audio)
+      if (contentType.includes('audio/')) {
+        const blob = await response.blob();
+        return { data: blob as unknown as T, error: undefined };
+      }
+
+      const data = await response.json();
+      return { data: data.data ?? data, error: undefined };
+    } catch (error) {
+      if (error instanceof Error) {
+        if (error.name === 'AbortError') {
+          return { data: null as unknown as T, error: 'Request timeout' };
+        }
+        return { data: null as unknown as T, error: error.message };
+      }
+      return { data: null as unknown as T, error: 'Unknown error occurred' };
+    }
+  }
+
+  private async makeBlobRequest(
+    endpoint: string,
+    body: Record<string, unknown>
+  ): Promise<ApiResponse<Blob>> {
+    const url = `${this.baseUrl}${endpoint}`;
+
+    try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 60000);
+
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(this.authToken && { Authorization: `Bearer ${this.authToken}` }),
+        },
+        body: JSON.stringify(body),
+        signal: controller.signal,
+      });
+
+      clearTimeout(timeoutId);
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({ error: response.statusText }));
+        return { data: null as unknown as Blob, error: errorData.error || errorData.message || response.statusText, status: response.status };
+      }
+
+      const blob = await response.blob();
+      return { data: blob, error: undefined };
+    } catch (error) {
+      if (error instanceof Error) {
+        if (error.name === 'AbortError') {
+          return { data: null as unknown as Blob, error: 'Request timeout' };
+        }
+        return { data: null as unknown as Blob, error: error.message };
+      }
+      return { data: null as unknown as Blob, error: 'Unknown error occurred' };
+    }
+  }
+
+  // AI Isyarat (Sign Language) methods
+  aiIsyarat = {
+    recognize: async (image: File) => {
+      const formData = new FormData();
+      formData.append('file', image);
+      return await this.makeFormDataRequest<SignRecognitionResult>('/ai/isyarat/recognize', formData);
+    },
+
+    recognizeSequence: async (images: File[]) => {
+      const formData = new FormData();
+      images.forEach(img => formData.append('files', img));
+      return await this.makeFormDataRequest<SignRecognitionResult>('/ai/isyarat/recognize/sequence', formData);
+    },
+
+    dictionary: async (query?: string) => {
+      const qs = query ? `?q=${encodeURIComponent(query)}` : '';
+      return await this.makeRequest<DictionaryEntry[]>(`/ai/isyarat/dictionary${qs}`);
+    },
+
+    dictionaryGet: async (key: string) => {
+      return await this.makeRequest<DictionaryEntry>(`/ai/isyarat/dictionary/${key}`);
+    },
+
+    tts: async (text: string) => {
+      return await this.makeBlobRequest('/ai/isyarat/tts', { text });
+    },
+  };
+
+  // AI Vision methods
+  aiVision = {
+    detect: async (image: File) => {
+      const formData = new FormData();
+      formData.append('file', image);
+      return await this.makeFormDataRequest<ObjectDetectionResult>('/ai/vision/detect', formData);
+    },
+
+    ocr: async (image: File) => {
+      const formData = new FormData();
+      formData.append('file', image);
+      return await this.makeFormDataRequest<OCRResult>('/ai/vision/ocr', formData);
+    },
+
+    describe: async (image: File) => {
+      const formData = new FormData();
+      formData.append('file', image);
+      return await this.makeFormDataRequest<SceneDescription>('/ai/vision/describe', formData);
+    },
+
+    tts: async (text: string) => {
+      return await this.makeBlobRequest('/ai/vision/tts', { text });
+    },
+  };
+
+  // AI Health check
+  aiHealth = async () => {
+    return await this.makeRequest<AIHealthStatus>('/ai/health');
+  };
 
   private setAuthToken(token: string) {
     this.authToken = token;

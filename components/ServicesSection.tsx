@@ -12,6 +12,8 @@ import {
   GraduationCap,
   CheckCircle,
   ArrowRight,
+  Hand,
+  Eye,
 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 
@@ -39,6 +41,28 @@ const ServicesSection = () => {
       color: 'bg-blue-500',
       lightColor: 'bg-blue-100',
       textColor: 'text-blue-600',
+      available: true,
+    },
+    {
+      id: 'isyarat-ai',
+      icon: Hand,
+      title: 'Isyarat AI',
+      description: 'Kenali bahasa isyarat BISINDO dengan kecerdasan buatan.',
+      features: ['Pengenalan isyarat', 'Kamus BISINDO', 'Text-to-Speech'],
+      color: 'bg-indigo-500',
+      lightColor: 'bg-indigo-100',
+      textColor: 'text-indigo-600',
+      available: true,
+    },
+    {
+      id: 'vision-ai',
+      icon: Eye,
+      title: 'Vision AI',
+      description: 'Bantuan penglihatan untuk tunanetra menggunakan AI.',
+      features: ['Deteksi objek', 'Baca teks (OCR)', 'Deskripsi gambar'],
+      color: 'bg-cyan-500',
+      lightColor: 'bg-cyan-100',
+      textColor: 'text-cyan-600',
       available: true,
     },
     {
@@ -93,6 +117,10 @@ const ServicesSection = () => {
       router.push('/#layanan');
     } else if (service.id === 'komunitas-support') {
       router.push('/komunitas');
+    } else if (service.id === 'isyarat-ai') {
+      router.push('/isyarat');
+    } else if (service.id === 'vision-ai') {
+      router.push('/mata');
     }
   };
 

@@ -564,6 +564,50 @@ export interface PasswordReset {
   new_password: string;
 }
 
+// AI Service Types
+export interface SignRecognitionResult {
+  signs: Array<{
+    label: string;
+    confidence: number;
+  }>;
+  num_hands: number;
+}
+
+export interface DictionaryEntry {
+  key: string;
+  label: string;
+  description?: string;
+  category?: string;
+  image_url?: string;
+}
+
+export interface ObjectDetectionResult {
+  objects: Array<{
+    label: string;
+    confidence: number;
+    bbox?: [number, number, number, number];
+  }>;
+}
+
+export interface OCRResult {
+  text: string;
+  language?: string;
+}
+
+export interface SceneDescription {
+  description: string;
+  language: string;
+}
+
+export interface TTSRequest {
+  text: string;
+}
+
+export interface AIHealthStatus {
+  isyarat: 'ok' | 'unavailable' | 'not_configured';
+  vision: 'ok' | 'unavailable' | 'not_configured';
+}
+
 // Database-like Types for compatibility
 export type Tables<T> = T extends 'profiles' 
   ? Profile

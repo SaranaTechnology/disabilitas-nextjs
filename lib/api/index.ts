@@ -5,3 +5,4 @@ export * from './services/userService';
 export * from './services/appointmentService';
 export * from './services/therapyService';
 export * from './services/notificationService';
+export * from './services/aiService';
