@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { BreadcrumbJsonLd } from '@/components/JsonLd';
 
 export const metadata: Metadata = {
   title: 'Isyarat AI - Pengenalan Bahasa Isyarat BISINDO',
@@ -21,8 +22,21 @@ export const metadata: Metadata = {
       'Kenali bahasa isyarat BISINDO dengan AI, jelajahi kamus isyarat, dan ubah teks menjadi suara.',
     type: 'website',
   },
+  alternates: {
+    canonical: 'https://disabilitasku.id/isyarat',
+  },
 };
 
 export default function IsyaratLayout({ children }: { children: React.ReactNode }) {
-  return children;
+  return (
+    <>
+      <BreadcrumbJsonLd
+        items={[
+          { name: 'Beranda', url: 'https://disabilitasku.id' },
+          { name: 'Isyarat AI', url: 'https://disabilitasku.id/isyarat' },
+        ]}
+      />
+      {children}
+    </>
+  );
 }

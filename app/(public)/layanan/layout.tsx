@@ -1,4 +1,5 @@
 import { Metadata } from 'next';
+import { BreadcrumbJsonLd } from '@/components/JsonLd';
 
 export const metadata: Metadata = {
   title: 'Layanan Terapi & Rehabilitasi',
@@ -8,8 +9,21 @@ export const metadata: Metadata = {
     title: 'Layanan Terapi & Rehabilitasi | DisabilitasKu',
     description: 'Temukan layanan terapi profesional untuk penyandang disabilitas di Indonesia.',
   },
+  alternates: {
+    canonical: 'https://disabilitasku.id/layanan',
+  },
 };
 
 export default function LayananLayout({ children }: { children: React.ReactNode }) {
-  return children;
+  return (
+    <>
+      <BreadcrumbJsonLd
+        items={[
+          { name: 'Beranda', url: 'https://disabilitasku.id' },
+          { name: 'Layanan', url: 'https://disabilitasku.id/layanan' },
+        ]}
+      />
+      {children}
+    </>
+  );
 }

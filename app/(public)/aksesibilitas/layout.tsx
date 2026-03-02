@@ -1,4 +1,5 @@
 import { Metadata } from 'next';
+import { BreadcrumbJsonLd } from '@/components/JsonLd';
 
 export const metadata: Metadata = {
   title: 'Aksesibilitas',
@@ -8,8 +9,21 @@ export const metadata: Metadata = {
     title: 'Aksesibilitas | DisabilitasKu',
     description: 'Komitmen DisabilitasKu terhadap aksesibilitas digital dan standar WCAG 2.1 AA.',
   },
+  alternates: {
+    canonical: 'https://disabilitasku.id/aksesibilitas',
+  },
 };
 
 export default function AksesibilitasLayout({ children }: { children: React.ReactNode }) {
-  return children;
+  return (
+    <>
+      <BreadcrumbJsonLd
+        items={[
+          { name: 'Beranda', url: 'https://disabilitasku.id' },
+          { name: 'Aksesibilitas', url: 'https://disabilitasku.id/aksesibilitas' },
+        ]}
+      />
+      {children}
+    </>
+  );
 }

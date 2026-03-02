@@ -1,9 +1,20 @@
 import { MetadataRoute } from 'next';
+import { getAllArticleSlugs, getAllEventIds, getAllCommunityIds } from '@/lib/api/seo';
 
-export default function sitemap(): MetadataRoute.Sitemap {
+const serviceIds = [
+  'konsultasi-aksesibilitas',
+  'layanan-kesehatan',
+  'komunitas-support',
+  'sumber-belajar',
+  'peluang-kerja',
+  'program-pelatihan',
+];
+
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://disabilitasku.id';
 
-  return [
+  // Static routes
+  const staticRoutes: MetadataRoute.Sitemap = [
     {
       url: baseUrl,
       lastModified: new Date(),
@@ -82,5 +93,49 @@ export default function sitemap(): MetadataRoute.Sitemap {
       changeFrequency: 'monthly',
       priority: 0.3,
     },
+  ];
+
+  // Service detail routes (static data)
+  const serviceRoutes: MetadataRoute.Sitemap = serviceIds.map((id) => ({
+    url: `${baseUrl}/layanan/${id}`,
+    lastModified: new Date(),
+    changeFrequency: 'monthly' as const,
+    priority: 0.7,
+  }));
+
+  // Dynamic routes from API
+  const [articles, events, communities] = await Promise.all([
+    getAllArticleSlugs(),
+    getAllEventIds(),
+    getAllCommunityIds(),
+  ]);
+
+  const articleRoutes: MetadataRoute.Sitemap = articles.map((a) => ({
+    url: `${baseUrl}/artikel/${a.slug}`,
+    lastModified: new Date(a.updated_at || a.published_at || a.created_at),
+    changeFrequency: 'weekly' as const,
+    priority: 0.7,
+  }));
+
+  const eventRoutes: MetadataRoute.Sitemap = events.map((e) => ({
+    url: `${baseUrl}/acara/${e.id}`,
+    lastModified: new Date(e.updated_at || e.created_at),
+    changeFrequency: 'weekly' as const,
+    priority: 0.6,
+  }));
+
+  const communityRoutes: MetadataRoute.Sitemap = communities.map((c) => ({
+    url: `${baseUrl}/komunitas/${c.id}`,
+    lastModified: new Date(c.updated_at || c.created_at),
+    changeFrequency: 'weekly' as const,
+    priority: 0.6,
+  }));
+
+  return [
+    ...staticRoutes,
+    ...serviceRoutes,
+    ...articleRoutes,
+    ...eventRoutes,
+    ...communityRoutes,
   ];
 }

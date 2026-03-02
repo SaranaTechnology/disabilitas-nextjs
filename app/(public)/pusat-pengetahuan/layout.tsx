@@ -1,4 +1,5 @@
 import { Metadata } from 'next';
+import { BreadcrumbJsonLd } from '@/components/JsonLd';
 
 export const metadata: Metadata = {
   title: 'Pusat Pengetahuan Disabilitas',
@@ -8,8 +9,21 @@ export const metadata: Metadata = {
     title: 'Pusat Pengetahuan Disabilitas | DisabilitasKu',
     description: 'Pusat informasi dan pengetahuan tentang berbagai jenis disabilitas dan terapi.',
   },
+  alternates: {
+    canonical: 'https://disabilitasku.id/pusat-pengetahuan',
+  },
 };
 
 export default function PusatPengetahuanLayout({ children }: { children: React.ReactNode }) {
-  return children;
+  return (
+    <>
+      <BreadcrumbJsonLd
+        items={[
+          { name: 'Beranda', url: 'https://disabilitasku.id' },
+          { name: 'Pusat Pengetahuan', url: 'https://disabilitasku.id/pusat-pengetahuan' },
+        ]}
+      />
+      {children}
+    </>
+  );
 }

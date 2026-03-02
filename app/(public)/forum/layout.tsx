@@ -1,4 +1,5 @@
 import { Metadata } from 'next';
+import { BreadcrumbJsonLd } from '@/components/JsonLd';
 
 export const metadata: Metadata = {
   title: 'Forum Komunitas Disabilitas',
@@ -8,8 +9,21 @@ export const metadata: Metadata = {
     title: 'Forum Komunitas Disabilitas | DisabilitasKu',
     description: 'Bergabung dengan forum komunitas penyandang disabilitas Indonesia.',
   },
+  alternates: {
+    canonical: 'https://disabilitasku.id/forum',
+  },
 };
 
 export default function ForumLayout({ children }: { children: React.ReactNode }) {
-  return children;
+  return (
+    <>
+      <BreadcrumbJsonLd
+        items={[
+          { name: 'Beranda', url: 'https://disabilitasku.id' },
+          { name: 'Forum', url: 'https://disabilitasku.id/forum' },
+        ]}
+      />
+      {children}
+    </>
+  );
 }

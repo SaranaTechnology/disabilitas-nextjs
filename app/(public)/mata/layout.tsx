@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { BreadcrumbJsonLd } from '@/components/JsonLd';
 
 export const metadata: Metadata = {
   title: 'Vision AI - Bantuan Penglihatan untuk Tunanetra',
@@ -20,8 +21,21 @@ export const metadata: Metadata = {
       'Deteksi objek, baca teks dari gambar, dan dapatkan deskripsi pemandangan dengan AI.',
     type: 'website',
   },
+  alternates: {
+    canonical: 'https://disabilitasku.id/mata',
+  },
 };
 
 export default function MataLayout({ children }: { children: React.ReactNode }) {
-  return children;
+  return (
+    <>
+      <BreadcrumbJsonLd
+        items={[
+          { name: 'Beranda', url: 'https://disabilitasku.id' },
+          { name: 'Vision AI', url: 'https://disabilitasku.id/mata' },
+        ]}
+      />
+      {children}
+    </>
+  );
 }

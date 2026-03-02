@@ -10,6 +10,7 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'https://disabilitasku.id'),
   title: {
     default: "DisabilitasKu - Platform Inklusif untuk Penyandang Disabilitas Indonesia",
     template: "%s | DisabilitasKu",
@@ -46,17 +47,20 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     locale: "id_ID",
+    url: "https://disabilitasku.id",
     siteName: "DisabilitasKu",
     title: "DisabilitasKu - Platform Inklusif untuk Penyandang Disabilitas Indonesia",
     description: "Platform inklusif yang menghubungkan penyandang disabilitas dengan layanan terapi profesional, konsultasi online, forum komunitas, dan dukungan di Indonesia.",
   },
   twitter: {
     card: "summary_large_image",
+    site: "@disabilitasku",
+    creator: "@disabilitasku",
     title: "DisabilitasKu - Platform Inklusif untuk Penyandang Disabilitas",
     description: "Platform inklusif yang menghubungkan penyandang disabilitas dengan layanan terapi profesional dan dukungan komunitas di Indonesia.",
   },
   alternates: {
-    canonical: "/",
+    canonical: "https://disabilitasku.id",
   },
   category: "health",
 };
