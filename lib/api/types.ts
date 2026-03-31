@@ -579,6 +579,7 @@ export interface DictionaryEntry {
   description?: string;
   category?: string;
   image_url?: string;
+  video_url?: string;
 }
 
 export interface ObjectDetectionResult {
@@ -606,6 +607,46 @@ export interface TTSRequest {
 export interface AIHealthStatus {
   isyarat: 'ok' | 'unavailable' | 'not_configured';
   vision: 'ok' | 'unavailable' | 'not_configured';
+}
+
+// Jobs (Cari Kerja)
+export interface JobSummary {
+  id: string;
+  title: string;
+  company_name: string;
+  company_logo?: string;
+  location: string;
+  work_type: string;
+  employment_type: string;
+  salary_min?: number;
+  salary_max?: number;
+  salary_currency?: string;
+  disability_types?: string;
+  deadline_apply: string;
+  view_count: number;
+  created_at: string;
+}
+
+export interface JobDetail extends JobSummary {
+  description: string;
+  company_website?: string;
+  required_skills?: string;
+  experience_level?: string;
+  status: string;
+  created_by: string;
+  author_name?: string;
+  updated_at: string;
+}
+
+export interface JobApplication {
+  id: string;
+  job_id: string;
+  job_title?: string;
+  company_name?: string;
+  cover_letter?: string;
+  resume_url?: string;
+  status: string;
+  applied_at: string;
 }
 
 // Database-like Types for compatibility

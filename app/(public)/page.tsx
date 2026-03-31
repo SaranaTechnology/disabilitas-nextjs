@@ -11,7 +11,7 @@ export default function HomePage() {
     <div className="min-h-screen bg-white">
       <HeroSection />
       <ServicesSection />
-      <TherapyLocationFinder />
+      <TherapyLocationFinder /> 
       <ArticlesSection />
       <CommunitySection />
       <TherapyLocationRegistrationForm />

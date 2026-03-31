@@ -21,6 +21,7 @@ const Header = () => {
   const navigation = [
     { name: 'Beranda', href: '/', isRoute: true },
     { name: 'Layanan', href: '/layanan', isRoute: true },
+    { name: 'Cari Kerja', href: '/cari-kerja', isRoute: true },
     { name: 'Acara', href: '/acara', isRoute: true },
     { name: 'Komunitas', href: '/komunitas', isRoute: true },
   ];

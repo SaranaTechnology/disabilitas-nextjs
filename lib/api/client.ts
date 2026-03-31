@@ -50,7 +50,10 @@ import type {
   ObjectDetectionResult,
   OCRResult,
   SceneDescription,
-  AIHealthStatus
+  AIHealthStatus,
+  JobSummary,
+  JobDetail,
+  JobApplication
 } from './types';
 
 /** Shape returned by the /me endpoint (PascalCase or snake_case from Go backend) */
@@ -536,6 +539,22 @@ class ApiClient {
       getCategories: async () => {
         return await this.makeRequest<string[]>('/public/articles/categories');
       }
+    },
+    jobs: {
+      list: async (params: { q?: string; work_type?: string; employment_type?: string; location?: string; limit?: number; offset?: number } = {}) => {
+        const qs = new URLSearchParams();
+        if (params.q) qs.set('q', params.q);
+        if (params.work_type) qs.set('work_type', params.work_type);
+        if (params.employment_type) qs.set('employment_type', params.employment_type);
+        if (params.location) qs.set('location', params.location);
+        if (params.limit) qs.set('limit', String(params.limit));
+        if (params.offset) qs.set('offset', String(params.offset));
+        const suffix = qs.toString() ? `?${qs.toString()}` : '';
+        return await this.makeRequest<JobSummary[]>(`/public/jobs${suffix}`);
+      },
+      get: async (id: string) => {
+        return await this.makeRequest<JobDetail>(`/public/jobs/${id}`);
+      }
     }
   };
 
@@ -966,6 +985,25 @@ class ApiClient {
     }
   };
 
+  // Jobs methods (protected)
+  jobs = {
+    create: async (data: Record<string, unknown>) => {
+      return await this.makeRequest<JobDetail>('/jobs', {
+        method: 'POST',
+        body: JSON.stringify(data),
+      });
+    },
+    apply: async (jobId: string, data: { cover_letter?: string; resume_url?: string }) => {
+      return await this.makeRequest<JobApplication>(`/jobs/${jobId}/apply`, {
+        method: 'POST',
+        body: JSON.stringify(data),
+      });
+    },
+    myApplications: async () => {
+      return await this.makeRequest<JobApplication[]>('/me/job-applications');
+    }
+  };
+
   // Admin events methods
   adminEvents = {
     list: async (params: { limit?: number; offset?: number } = {}) => {
@@ -1088,6 +1126,13 @@ class ApiClient {
       list: this.public.articles.list,
       get: this.public.articles.get,
       categories: this.public.articles.getCategories
+    };
+  }
+
+  get publicJobs() {
+    return {
+      list: this.public.jobs.list,
+      get: this.public.jobs.get,
     };
   }
 

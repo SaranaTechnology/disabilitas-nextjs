@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { Hand, BookOpen, Volume2, Search, Loader2, AlertCircle } from 'lucide-react';
+import { Hand, BookOpen, Volume2, Search, Loader2, AlertCircle, Play } from 'lucide-react';
 import ImageUploadArea from '@/components/ai/ImageUploadArea';
 import AudioPlayer from '@/components/ai/AudioPlayer';
 import { useIsyaratAI } from '@/hooks/useAI';
@@ -73,10 +73,10 @@ export default function IsyaratPage() {
           <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-white/20 mb-4">
             <Hand className="w-8 h-8" />
           </div>
-          <h1 className="text-3xl md:text-4xl font-bold mb-3">Isyarat AI</h1>
+          <h1 className="text-3xl md:text-4xl font-bold mb-3">Kamus BISINDO & Pengenalan Bahasa Isyarat</h1>
           <p className="text-indigo-100 max-w-2xl mx-auto">
-            Pengenalan bahasa isyarat BISINDO dengan kecerdasan buatan. Upload gambar isyarat,
-            jelajahi kamus, atau ubah teks menjadi suara.
+            Belajar bahasa isyarat BISINDO dengan AI. Kenali gerakan tangan dari foto,
+            cari kosakata di kamus isyarat lengkap dengan video, atau ubah teks menjadi suara.
           </p>
         </div>
       </div>
@@ -151,9 +151,9 @@ export default function IsyaratPage() {
           <TabsContent value="kamus">
             <Card>
               <CardHeader>
-                <CardTitle>Kamus Bahasa Isyarat</CardTitle>
+                <CardTitle>Kamus Bahasa Isyarat BISINDO</CardTitle>
                 <CardDescription>
-                  Cari dan jelajahi kosakata bahasa isyarat BISINDO
+                  Cari dan jelajahi kosakata BISINDO lengkap dengan gambar dan video isyarat
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
@@ -185,31 +185,57 @@ export default function IsyaratPage() {
                     {dictionary.data.map((entry) => (
                       <div
                         key={entry.key}
-                        className="flex items-start gap-3 bg-white border rounded-lg p-4 hover:bg-gray-50 transition-colors"
+                        className="bg-white border rounded-lg p-4 hover:bg-gray-50 transition-colors space-y-3"
                       >
-                        {entry.image_url && (
-                          <img
-                            src={entry.image_url}
-                            alt={entry.label}
-                            className="w-16 h-16 rounded-lg object-cover shrink-0 bg-gray-100"
-                          />
-                        )}
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2 flex-wrap">
-                            <p className="font-semibold text-gray-900">{entry.label}</p>
-                            <Badge variant="secondary" className="text-xs">
-                              {entry.key}
-                            </Badge>
-                            {entry.category && (
-                              <Badge variant="outline" className="text-xs text-indigo-600 border-indigo-200">
-                                {entry.category.replace(/_/g, ' ')}
+                        <div className="flex items-start gap-3">
+                          {entry.image_url && (
+                            <img
+                              src={entry.image_url}
+                              alt={`Isyarat BISINDO: ${entry.label}`}
+                              className="w-16 h-16 rounded-lg object-cover shrink-0 bg-gray-100"
+                            />
+                          )}
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2 flex-wrap">
+                              <p className="font-semibold text-gray-900">{entry.label}</p>
+                              <Badge variant="secondary" className="text-xs">
+                                {entry.key}
                               </Badge>
+                              {entry.category && (
+                                <Badge variant="outline" className="text-xs text-indigo-600 border-indigo-200">
+                                  {entry.category.replace(/_/g, ' ')}
+                                </Badge>
+                              )}
+                            </div>
+                            {entry.description && (
+                              <p className="text-sm text-gray-500 mt-1">{entry.description}</p>
                             )}
                           </div>
-                          {entry.description && (
-                            <p className="text-sm text-gray-500 mt-1">{entry.description}</p>
-                          )}
                         </div>
+                        {entry.video_url && (
+                          <div className="rounded-lg overflow-hidden bg-black">
+                            {entry.video_url.includes('youtube.com') || entry.video_url.includes('youtu.be') ? (
+                              <iframe
+                                src={entry.video_url.replace('watch?v=', 'embed/').replace('youtu.be/', 'youtube.com/embed/')}
+                                title={`Video isyarat BISINDO: ${entry.label}`}
+                                className="w-full aspect-video"
+                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                allowFullScreen
+                              />
+                            ) : (
+                              <video
+                                src={entry.video_url}
+                                controls
+                                preload="metadata"
+                                className="w-full max-h-48 object-contain"
+                                playsInline
+                              >
+                                <track kind="captions" />
+                                Browser Anda tidak mendukung pemutaran video.
+                              </video>
+                            )}
+                          </div>
+                        )}
                       </div>
                     ))}
                   </div>
