@@ -51,7 +51,7 @@ export default function IsyaratLayout({ children }: { children: React.ReactNode 
         ]}
       />
       <FAQJsonLd
-        items={[
+        questions={[
           {
             question: 'Apa itu BISINDO?',
             answer: 'BISINDO (Bahasa Isyarat Indonesia) adalah bahasa isyarat yang digunakan oleh komunitas tuli di Indonesia untuk berkomunikasi sehari-hari. Berbeda dengan SIBI yang mengikuti struktur bahasa Indonesia lisan, BISINDO memiliki tata bahasa sendiri.',
