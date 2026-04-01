@@ -67,7 +67,7 @@ export default function ServicesPage() {
       features: ['Lowongan kerja', 'Pelatihan skill', 'Career coaching'],
       lightColor: 'bg-orange-100',
       textColor: 'text-orange-600',
-      available: false,
+      available: true,
     },
     {
       id: 'program-pelatihan',
@@ -86,6 +86,8 @@ export default function ServicesPage() {
       router.push('/#layanan');
     } else if (service.id === 'komunitas-support') {
       router.push('/forum');
+    } else if (service.id === 'peluang-kerja') {
+      router.push('/cari-kerja');
     } else {
       router.push(`/layanan/${service.id}`);
     }
