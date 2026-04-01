@@ -71,7 +71,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="id">
+    <html lang="id" className="light" style={{ colorScheme: 'light' }}>
       <head>
         <OrganizationJsonLd />
         <WebSiteJsonLd />
