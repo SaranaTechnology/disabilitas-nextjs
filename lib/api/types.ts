@@ -674,6 +674,50 @@ export type TablesUpdate<T> = T extends 'profiles'
   ? AppointmentUpdate
   : never;
 
+// Trainings (Pelatihan)
+export interface TrainingSummary {
+  id: string;
+  title: string;
+  organizer_name: string;
+  organizer_logo?: string;
+  category: string;
+  training_type: string;
+  location?: string;
+  start_date: string;
+  end_date?: string;
+  price: number;
+  price_currency?: string;
+  is_free: boolean;
+  disability_types?: string;
+  skill_level?: string;
+  certificate: boolean;
+  view_count: number;
+  registration_count?: number;
+  max_participants?: number;
+  created_at: string;
+}
+
+export interface TrainingDetail extends TrainingSummary {
+  description: string;
+  organizer_website?: string;
+  training_url?: string;
+  schedule_info?: string;
+  status: string;
+  created_by: string;
+  author_name?: string;
+  updated_at: string;
+}
+
+export interface TrainingRegistration {
+  id: string;
+  training_id: string;
+  training_title?: string;
+  organizer_name?: string;
+  motivation?: string;
+  status: string;
+  registered_at: string;
+}
+
 // Legacy Database type for compatibility
 export type Database = {
   public: {

@@ -77,7 +77,7 @@ export default function ServicesPage() {
       features: ['Soft skill', 'Hard skill', 'Sertifikasi'],
       lightColor: 'bg-teal-100',
       textColor: 'text-teal-600',
-      available: false,
+      available: true,
     },
   ];
 
@@ -88,6 +88,8 @@ export default function ServicesPage() {
       router.push('/forum');
     } else if (service.id === 'peluang-kerja') {
       router.push('/cari-kerja');
+    } else if (service.id === 'program-pelatihan') {
+      router.push('/pelatihan');
     } else {
       router.push(`/layanan/${service.id}`);
     }

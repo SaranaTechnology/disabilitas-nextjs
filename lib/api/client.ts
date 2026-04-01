@@ -53,7 +53,10 @@ import type {
   AIHealthStatus,
   JobSummary,
   JobDetail,
-  JobApplication
+  JobApplication,
+  TrainingSummary,
+  TrainingDetail,
+  TrainingRegistration
 } from './types';
 
 /** Shape returned by the /me endpoint (PascalCase or snake_case from Go backend) */
@@ -555,6 +558,23 @@ class ApiClient {
       get: async (id: string) => {
         return await this.makeRequest<JobDetail>(`/public/jobs/${id}`);
       }
+    },
+    trainings: {
+      list: async (params: { q?: string; category?: string; training_type?: string; skill_level?: string; is_free?: string; limit?: number; offset?: number } = {}) => {
+        const qs = new URLSearchParams();
+        if (params.q) qs.set('q', params.q);
+        if (params.category) qs.set('category', params.category);
+        if (params.training_type) qs.set('training_type', params.training_type);
+        if (params.skill_level) qs.set('skill_level', params.skill_level);
+        if (params.is_free) qs.set('is_free', params.is_free);
+        if (params.limit) qs.set('limit', String(params.limit));
+        if (params.offset) qs.set('offset', String(params.offset));
+        const suffix = qs.toString() ? `?${qs.toString()}` : '';
+        return await this.makeRequest<TrainingSummary[]>(`/public/trainings${suffix}`);
+      },
+      get: async (id: string) => {
+        return await this.makeRequest<TrainingDetail>(`/public/trainings/${id}`);
+      }
     }
   };
 
@@ -1004,6 +1024,25 @@ class ApiClient {
     }
   };
 
+  // Trainings methods (protected)
+  trainings = {
+    create: async (data: Record<string, unknown>) => {
+      return await this.makeRequest<TrainingDetail>('/trainings', {
+        method: 'POST',
+        body: JSON.stringify(data),
+      });
+    },
+    register: async (trainingId: string, data: { motivation?: string }) => {
+      return await this.makeRequest<TrainingRegistration>(`/trainings/${trainingId}/register`, {
+        method: 'POST',
+        body: JSON.stringify(data),
+      });
+    },
+    myRegistrations: async () => {
+      return await this.makeRequest<TrainingRegistration[]>('/me/training-registrations');
+    }
+  };
+
   // Admin events methods
   adminEvents = {
     list: async (params: { limit?: number; offset?: number } = {}) => {
@@ -1133,6 +1172,13 @@ class ApiClient {
     return {
       list: this.public.jobs.list,
       get: this.public.jobs.get,
+    };
+  }
+
+  get publicTrainings() {
+    return {
+      list: this.public.trainings.list,
+      get: this.public.trainings.get,
     };
   }
 
