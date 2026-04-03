@@ -3,23 +3,15 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Heart, MessageCircle, Users, Calendar } from 'lucide-react';
+import { MessageCircle, Users, Calendar, ArrowRight, Flame, Clock } from 'lucide-react';
 import { apiClient } from '@/lib/api/client';
 import type { ForumThread, Event } from '@/lib/api/client';
-
-interface CommunityStats {
-  label: string;
-  value: string;
-  icon: typeof Users;
-}
 
 const CommunitySection = () => {
   const [forumTopics, setForumTopics] = useState<ForumThread[]>([]);
   const [upcomingEvents, setUpcomingEvents] = useState<Event[]>([]);
   const [loading, setLoading] = useState(true);
-  const [totals, setTotals] = useState({ forum: 0, events: 0, communities: 0, articles: 0 });
 
   useEffect(() => {
     fetchData();
@@ -27,27 +19,17 @@ const CommunitySection = () => {
 
   const fetchData = async () => {
     try {
-      const [forumRes, eventsRes, communitiesRes, articlesRes] = await Promise.all([
+      const [forumRes, eventsRes] = await Promise.all([
         apiClient.forum.listThreads(),
         apiClient.events.list({ limit: 3 }),
-        apiClient.communities.list({ per_page: 1 }),
-        apiClient.public.articles.list({ limit: 1 }),
       ]);
 
       if (forumRes.data && Array.isArray(forumRes.data)) {
         setForumTopics(forumRes.data.slice(0, 4));
       }
-
       if (eventsRes.data && Array.isArray(eventsRes.data)) {
         setUpcomingEvents(eventsRes.data);
       }
-
-      setTotals({
-        forum: forumRes.meta?.total ?? (Array.isArray(forumRes.data) ? forumRes.data.length : 0),
-        events: eventsRes.meta?.total ?? (Array.isArray(eventsRes.data) ? eventsRes.data.length : 0),
-        communities: communitiesRes.meta?.total ?? (Array.isArray(communitiesRes.data) ? communitiesRes.data.length : 0),
-        articles: articlesRes.meta?.total ?? 0,
-      });
     } catch (error) {
       console.error('Error fetching community data:', error);
     } finally {
@@ -59,8 +41,8 @@ const CommunitySection = () => {
     if (!dateString) return '-';
     return new Date(dateString).toLocaleDateString('id-ID', {
       day: 'numeric',
-      month: 'long',
-      year: 'numeric'
+      month: 'short',
+      year: 'numeric',
     });
   };
 
@@ -68,17 +50,8 @@ const CommunitySection = () => {
     if (!dateString) return '-';
     return new Date(dateString).toLocaleTimeString('id-ID', {
       hour: '2-digit',
-      minute: '2-digit'
+      minute: '2-digit',
     }) + ' WIB';
-  };
-
-  const getEventTypeLabel = (mode?: string) => {
-    switch (mode?.toLowerCase()) {
-      case 'online': return 'Online';
-      case 'offline': return 'Offline';
-      case 'hybrid': return 'Hybrid';
-      default: return mode || 'Online';
-    }
   };
 
   const getRelativeTime = (dateString?: string) => {
@@ -88,7 +61,6 @@ const CommunitySection = () => {
     const diffMs = now.getTime() - date.getTime();
     const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
     const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
-
     if (diffHours < 1) return 'Baru saja';
     if (diffHours < 24) return `${diffHours} jam lalu`;
     if (diffDays < 7) return `${diffDays} hari lalu`;
@@ -100,205 +72,193 @@ const CommunitySection = () => {
     return tags.split(',').map(t => t.trim()).filter(Boolean).slice(0, 3);
   };
 
-  const communityStats: CommunityStats[] = [
-    { label: 'Diskusi Forum', value: String(totals.forum), icon: MessageCircle },
-    { label: 'Event', value: String(totals.events), icon: Calendar },
-    { label: 'Komunitas', value: String(totals.communities), icon: Users },
-    { label: 'Artikel', value: String(totals.articles), icon: Heart }
-  ];
+  const getEventTypeColor = (mode?: string) => {
+    switch (mode?.toLowerCase()) {
+      case 'online': return 'bg-emerald-100 text-emerald-700';
+      case 'offline': return 'bg-amber-100 text-amber-700';
+      case 'hybrid': return 'bg-blue-100 text-blue-700';
+      default: return 'bg-gray-100 text-gray-600';
+    }
+  };
+
+  // Skeleton loader
+  const SkeletonCard = () => (
+    <div className="animate-pulse p-5 rounded-xl bg-white border border-gray-100">
+      <div className="h-4 bg-gray-200 rounded w-3/4 mb-3" />
+      <div className="h-3 bg-gray-100 rounded w-1/2 mb-2" />
+      <div className="flex gap-2">
+        <div className="h-5 bg-gray-100 rounded-full w-16" />
+        <div className="h-5 bg-gray-100 rounded-full w-20" />
+      </div>
+    </div>
+  );
 
   return (
-    <section id="komunitas" className="py-20 px-4 bg-gradient-to-br from-purple-50 to-blue-50">
-      <div className="max-w-7xl mx-auto">
-        <div className="text-center mb-12">
+    <section id="komunitas" className="py-20 px-4 relative overflow-hidden">
+      {/* Background */}
+      <div className="absolute inset-0 bg-gradient-to-br from-violet-50/50 via-white to-rose-50/30" />
+
+      <div className="relative max-w-6xl mx-auto">
+        {/* Header */}
+        <div className="text-center mb-14">
+          <span className="inline-block px-4 py-1.5 rounded-full bg-violet-100 text-violet-700 text-sm font-medium mb-4">
+            Komunitas Aktif
+          </span>
           <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-            Komunitas <span className="text-primary">Supportif</span>
+            Tumbuh Bersama
+            <span className="bg-gradient-to-r from-violet-600 to-pink-500 bg-clip-text text-transparent"> Komunitas</span>
           </h2>
-          <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-            Bergabung dengan komunitas yang saling mendukung, berbagi pengalaman, dan tumbuh bersama
+          <p className="text-gray-500 max-w-xl mx-auto">
+            Diskusikan pengalaman, dapatkan dukungan, dan ikuti event bersama ribuan anggota komunitas
           </p>
         </div>
 
-        {/* Community Stats */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-12">
-          {communityStats.map((stat) => {
-            const IconComponent = stat.icon;
-            return (
-              <div key={stat.label} className="text-center">
-                <div className="bg-white p-6 rounded-xl shadow-md hover:shadow-lg transition-shadow duration-300">
-                  <div className="bg-primary/10 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <IconComponent className="text-primary" size={28} aria-hidden="true" />
-                  </div>
-                  <div className="text-2xl font-bold text-gray-900 mb-1">{stat.value}</div>
-                  <div className="text-sm text-gray-600">{stat.label}</div>
-                </div>
-              </div>
-            );
-          })}
-        </div>
-
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           {/* Forum Discussion */}
           <div>
-            <div className="flex items-center justify-between mb-6">
-              <h3 className="text-2xl font-semibold text-gray-900">
-                Forum Diskusi
-              </h3>
-              <Link href="/forum">
-                <Button
-                  variant="outline"
-                  className="border-primary text-primary hover:bg-primary/5 focus:ring-2 focus:ring-primary"
-                  aria-label="Lihat semua diskusi forum"
-                >
-                  Lihat Semua
-                </Button>
+            <div className="flex items-center justify-between mb-5">
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 rounded-lg bg-violet-100 flex items-center justify-center">
+                  <MessageCircle className="w-4 h-4 text-violet-600" />
+                </div>
+                <h3 className="text-lg font-bold text-gray-900">Diskusi Terbaru</h3>
+              </div>
+              <Link href="/forum" className="text-sm font-medium text-primary hover:text-primary/80 flex items-center gap-1 transition-colors">
+                Semua <ArrowRight className="w-3.5 h-3.5" />
               </Link>
             </div>
 
-            <div className="space-y-4">
+            <div className="space-y-3">
               {loading ? (
-                <div className="text-center py-8">
-                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
-                  <p className="mt-2 text-gray-600 text-sm">Memuat diskusi...</p>
-                </div>
+                <>
+                  <SkeletonCard />
+                  <SkeletonCard />
+                  <SkeletonCard />
+                </>
               ) : forumTopics.length === 0 ? (
-                <Card className="text-center py-8">
-                  <CardContent>
-                    <MessageCircle className="mx-auto h-12 w-12 text-gray-400 mb-3" />
-                    <p className="text-gray-600">Belum ada diskusi. Jadilah yang pertama!</p>
-                  </CardContent>
-                </Card>
+                <div className="text-center py-10 rounded-xl bg-white border border-gray-100">
+                  <MessageCircle className="mx-auto h-10 w-10 text-gray-300 mb-3" />
+                  <p className="text-gray-400 text-sm">Belum ada diskusi. Jadilah yang pertama!</p>
+                </div>
               ) : (
                 forumTopics.map((topic) => (
-                  <Card key={topic.id} className="hover:shadow-md transition-shadow duration-300 border border-gray-200">
-                    <CardHeader className="pb-3">
-                      <CardTitle className="text-lg font-semibold text-gray-900 hover:text-primary cursor-pointer">
-                        <Link href={`/forum/${topic.id}`} className="focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 rounded">
-                          {topic.title}
-                        </Link>
-                      </CardTitle>
-                      <CardDescription className="flex items-center justify-between">
-                        <span>oleh {topic.user?.full_name || topic.user?.email || 'Pengguna'}</span>
-                        <span className="text-sm text-gray-500">{getRelativeTime(topic.created_at)}</span>
-                      </CardDescription>
-                    </CardHeader>
-                    <CardContent className="pt-0">
+                  <Link key={topic.id} href={`/forum/${topic.id}`} className="block">
+                    <div className="p-4 rounded-xl bg-white border border-gray-100 hover:border-violet-200 hover:shadow-md transition-all duration-250 group">
+                      <h4 className="text-sm font-semibold text-gray-900 group-hover:text-primary transition-colors line-clamp-1 mb-2">
+                        {topic.title}
+                      </h4>
                       <div className="flex items-center justify-between">
-                        <div className="flex flex-wrap gap-2">
+                        <div className="flex items-center gap-2 text-xs text-gray-400">
+                          {/* Avatar circle */}
+                          <div className="w-5 h-5 rounded-full bg-gradient-to-br from-violet-400 to-pink-400 flex items-center justify-center text-[9px] text-white font-bold">
+                            {(topic.user?.full_name || topic.user?.email || 'P').charAt(0).toUpperCase()}
+                          </div>
+                          <span>{topic.user?.full_name || topic.user?.email || 'Pengguna'}</span>
+                          <span className="text-gray-300">·</span>
+                          <Clock className="w-3 h-3" />
+                          <span>{getRelativeTime(topic.created_at)}</span>
+                        </div>
+                        <div className="flex gap-1.5">
                           {parseTags(topic.tags).map((tag) => (
-                            <Badge key={tag} variant="secondary" className="text-xs">
+                            <span key={tag} className="px-2 py-0.5 rounded-full bg-gray-100 text-[10px] text-gray-500 font-medium">
                               {tag}
-                            </Badge>
+                            </span>
                           ))}
                         </div>
                       </div>
-                    </CardContent>
-                  </Card>
+                    </div>
+                  </Link>
                 ))
               )}
             </div>
 
-            <div className="mt-6">
-              <Link href="/forum">
-                <Button
-                  size="lg"
-                  className="w-full bg-primary hover:bg-primary/90 text-white focus:ring-2 focus:ring-primary"
-                  aria-label="Mulai diskusi baru di forum"
-                >
-                  <MessageCircle className="mr-2" size={20} />
-                  Mulai Diskusi Baru
-                </Button>
-              </Link>
-            </div>
+            <Link href="/forum" className="block mt-4">
+              <Button className="w-full rounded-xl bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-700 hover:to-purple-700 text-white font-semibold shadow-md shadow-violet-500/20">
+                <Flame className="w-4 h-4 mr-2" />
+                Mulai Diskusi Baru
+              </Button>
+            </Link>
           </div>
 
-          {/* Upcoming Events */}
+          {/* Events */}
           <div>
-            <div className="flex items-center justify-between mb-6">
-              <h3 className="text-2xl font-semibold text-gray-900">
-                Event Mendatang
-              </h3>
-              <Link href="/acara">
-                <Button
-                  variant="outline"
-                  className="border-secondary text-secondary hover:bg-secondary/5 focus:ring-2 focus:ring-secondary"
-                  aria-label="Lihat semua event"
-                >
-                  Lihat Semua
-                </Button>
+            <div className="flex items-center justify-between mb-5">
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 rounded-lg bg-amber-100 flex items-center justify-center">
+                  <Calendar className="w-4 h-4 text-amber-600" />
+                </div>
+                <h3 className="text-lg font-bold text-gray-900">Event Mendatang</h3>
+              </div>
+              <Link href="/acara" className="text-sm font-medium text-primary hover:text-primary/80 flex items-center gap-1 transition-colors">
+                Semua <ArrowRight className="w-3.5 h-3.5" />
               </Link>
             </div>
 
-            <div className="space-y-4">
+            <div className="space-y-3">
               {loading ? (
-                <div className="text-center py-8">
-                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
-                  <p className="mt-2 text-gray-600 text-sm">Memuat event...</p>
-                </div>
+                <>
+                  <SkeletonCard />
+                  <SkeletonCard />
+                  <SkeletonCard />
+                </>
               ) : upcomingEvents.length === 0 ? (
-                <Card className="text-center py-8">
-                  <CardContent>
-                    <Calendar className="mx-auto h-12 w-12 text-gray-400 mb-3" />
-                    <p className="text-gray-600">Belum ada event mendatang.</p>
-                  </CardContent>
-                </Card>
+                <div className="text-center py-10 rounded-xl bg-white border border-gray-100">
+                  <Calendar className="mx-auto h-10 w-10 text-gray-300 mb-3" />
+                  <p className="text-gray-400 text-sm">Belum ada event mendatang.</p>
+                </div>
               ) : (
                 upcomingEvents.map((event) => (
-                  <Card key={event.id} className="hover:shadow-md transition-shadow duration-300 border border-gray-200">
-                    <CardHeader className="pb-3">
-                      <CardTitle className="text-lg font-semibold text-gray-900">
-                        {event.title}
-                      </CardTitle>
-                      <CardDescription className="space-y-1">
-                        <div className="flex items-center">
-                          <Calendar size={16} className="mr-2 text-gray-400" aria-hidden="true" />
-                          <span>{formatEventDate(event.start_at)} • {formatEventTime(event.start_at)}</span>
-                        </div>
-                      </CardDescription>
-                    </CardHeader>
-                    <CardContent className="pt-0">
-                      <div className="flex items-center justify-between">
-                        <Badge
-                          variant={event.mode === 'online' ? 'secondary' : 'outline'}
-                          className="text-xs"
-                        >
-                          {getEventTypeLabel(event.mode)}
-                        </Badge>
+                  <Link key={event.id} href={`/acara/${event.id}`} className="block">
+                    <div className="p-4 rounded-xl bg-white border border-gray-100 hover:border-amber-200 hover:shadow-md transition-all duration-250 group">
+                      <div className="flex items-start justify-between gap-3 mb-3">
+                        <h4 className="text-sm font-semibold text-gray-900 group-hover:text-primary transition-colors line-clamp-1 flex-1">
+                          {event.title}
+                        </h4>
+                        <span className={`flex-shrink-0 px-2.5 py-0.5 rounded-full text-[10px] font-semibold ${getEventTypeColor(event.mode)}`}>
+                          {event.mode || 'Online'}
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-4 text-xs text-gray-400">
+                        <span className="flex items-center gap-1.5">
+                          <Calendar className="w-3 h-3" />
+                          {formatEventDate(event.start_at)}
+                        </span>
+                        <span className="flex items-center gap-1.5">
+                          <Clock className="w-3 h-3" />
+                          {formatEventTime(event.start_at)}
+                        </span>
                         {event.capacity && (
-                          <div className="flex items-center text-sm text-gray-600">
-                            <Users size={16} className="mr-1" aria-hidden="true" />
-                            <span>Kapasitas: {event.capacity}</span>
-                          </div>
+                          <span className="flex items-center gap-1.5 ml-auto">
+                            <Users className="w-3 h-3" />
+                            {event.capacity} peserta
+                          </span>
                         )}
                       </div>
-                      <Link href={`/acara/${event.id}`}>
-                        <Button
-                          className="w-full mt-4 bg-secondary hover:bg-secondary/90 text-white focus:ring-2 focus:ring-secondary"
-                          aria-label={`Daftar untuk event ${event.title}`}
-                        >
-                          Lihat Detail
-                        </Button>
-                      </Link>
-                    </CardContent>
-                  </Card>
+                    </div>
+                  </Link>
                 ))
               )}
             </div>
-            
-            <div className="mt-6 p-6 bg-primary/5 rounded-xl border border-primary/20">
-              <h4 className="font-semibold text-gray-900 mb-3">
-                Ingin Mengadakan Event?
-              </h4>
-              <p className="text-gray-600 text-sm mb-4">
-                Bagikan keahlian dan pengalaman Anda dengan mengadakan workshop atau webinar untuk komunitas.
-              </p>
-              <Button
-                variant="outline"
-                className="border-primary text-primary hover:bg-primary hover:text-white focus:ring-2 focus:ring-primary"
-                aria-label="Ajukan proposal event"
-              >
-                Ajukan Event
-              </Button>
+
+            {/* Event CTA */}
+            <div className="mt-4 p-5 rounded-xl bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-100">
+              <div className="flex items-start gap-3">
+                <div className="w-10 h-10 rounded-xl bg-amber-100 flex items-center justify-center flex-shrink-0">
+                  <Flame className="w-5 h-5 text-amber-600" />
+                </div>
+                <div className="flex-1">
+                  <h4 className="font-semibold text-gray-900 text-sm mb-1">Ingin Mengadakan Event?</h4>
+                  <p className="text-gray-500 text-xs mb-3">Bagikan keahlian Anda melalui workshop atau webinar untuk komunitas.</p>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="rounded-full border-amber-300 text-amber-700 hover:bg-amber-100 text-xs h-8"
+                  >
+                    Ajukan Event
+                    <ArrowRight className="w-3 h-3 ml-1" />
+                  </Button>
+                </div>
+              </div>
             </div>
           </div>
         </div>

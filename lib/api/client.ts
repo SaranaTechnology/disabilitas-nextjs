@@ -50,6 +50,7 @@ import type {
   ObjectDetectionResult,
   OCRResult,
   SceneDescription,
+  CurrencyDetectionResult,
   AIHealthStatus,
   JobSummary,
   JobDetail,
@@ -1358,6 +1359,19 @@ class ApiClient {
 
     tts: async (text: string) => {
       return await this.makeBlobRequest('/ai/vision/tts', { text });
+    },
+  };
+
+  // AI Currency Detection methods
+  aiCurrency = {
+    detect: async (image: File) => {
+      const formData = new FormData();
+      formData.append('file', image);
+      return await this.makeFormDataRequest<CurrencyDetectionResult>('/ai/currency/detect', formData);
+    },
+
+    tts: async (text: string) => {
+      return await this.makeBlobRequest('/ai/currency/tts', { text });
     },
   };
 

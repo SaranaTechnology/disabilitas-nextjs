@@ -604,9 +604,22 @@ export interface TTSRequest {
   text: string;
 }
 
+export interface CurrencyDetectionResult {
+  currencies: Array<{
+    label: string;
+    denomination: number;
+    currency_code: string;
+    confidence: number;
+    count?: number;
+  }>;
+  total_value?: number;
+  currency?: string;
+}
+
 export interface AIHealthStatus {
   isyarat: 'ok' | 'unavailable' | 'not_configured';
   vision: 'ok' | 'unavailable' | 'not_configured';
+  currency?: 'ok' | 'unavailable' | 'not_configured';
 }
 
 // Jobs (Cari Kerja)

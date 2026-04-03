@@ -8,6 +8,7 @@ import type {
   ObjectDetectionResult,
   OCRResult,
   SceneDescription,
+  CurrencyDetectionResult,
   AIHealthStatus,
 } from '@/lib/api/types';
 
@@ -177,6 +178,50 @@ export function useVisionAI() {
     detect,
     extractText,
     describe,
+    speak,
+  };
+}
+
+export function useCurrencyAI() {
+  const [detectionState, setDetectionState] = useState<AIState<CurrencyDetectionResult>>({
+    data: null,
+    isLoading: false,
+    error: null,
+  });
+
+  const [ttsState, setTtsState] = useState<AIState<Blob>>({
+    data: null,
+    isLoading: false,
+    error: null,
+  });
+
+  const detect = useCallback(async (image: File) => {
+    setDetectionState(prev => ({ ...prev, isLoading: true, error: null }));
+    const response = await aiService.currency.detect(image);
+    if (response.error) {
+      setDetectionState(prev => ({ ...prev, isLoading: false, error: response.error ?? null }));
+      return { error: response.error };
+    }
+    setDetectionState(prev => ({ ...prev, isLoading: false, data: response.data }));
+    return { data: response.data };
+  }, []);
+
+  const speak = useCallback(async (text: string) => {
+    setTtsState(prev => ({ ...prev, isLoading: true, error: null }));
+    const response = await aiService.currency.tts(text);
+    if (response.error) {
+      setTtsState(prev => ({ ...prev, isLoading: false, error: response.error ?? null }));
+      return { error: response.error };
+    }
+    const blob = response.data as Blob;
+    setTtsState(prev => ({ ...prev, isLoading: false, data: blob }));
+    return { data: blob };
+  }, []);
+
+  return {
+    detection: detectionState,
+    tts: ttsState,
+    detect,
     speak,
   };
 }

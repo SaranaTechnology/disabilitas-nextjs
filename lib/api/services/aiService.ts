@@ -36,6 +36,16 @@ export const aiService = {
     },
   },
 
+  // Currency Detection AI
+  currency: {
+    detect: async (image: File) => {
+      return await apiClient.aiCurrency.detect(image);
+    },
+    tts: async (text: string) => {
+      return await apiClient.aiCurrency.tts(text);
+    },
+  },
+
   // Health check
   health: async () => {
     return await apiClient.aiHealth();

@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
-import { Menu, X, Shield, LogOut, User, Calendar, LayoutDashboard, ChevronDown, Hand, Eye, Sparkles } from 'lucide-react';
+import { Menu, X, Shield, LogOut, User, Calendar, LayoutDashboard, ChevronDown, Hand, Eye, Banknote, Sparkles } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
@@ -25,6 +25,7 @@ const Header = () => {
     { name: 'Pelatihan', href: '/pelatihan', isRoute: true },
     { name: 'Acara', href: '/acara', isRoute: true },
     { name: 'Komunitas', href: '/komunitas', isRoute: true },
+    { name: 'Artikel', href: '/artikel', isRoute: true },
   ];
 
   useEffect(() => {
@@ -129,6 +130,14 @@ const Header = () => {
                   >
                     <Eye className="w-4 h-4 text-cyan-500" />
                     Vision AI
+                  </Link>
+                  <Link
+                    href="/uang"
+                    className="flex items-center gap-2.5 px-4 py-2.5 text-sm text-gray-700 hover:bg-primary/5 hover:text-primary transition-colors"
+                    onClick={() => setIsAIOpen(false)}
+                  >
+                    <Banknote className="w-4 h-4 text-emerald-500" />
+                    Deteksi Uang
                   </Link>
                 </div>
               )}
@@ -266,6 +275,14 @@ const Header = () => {
               >
                 <Eye className="w-4 h-4 text-cyan-500" />
                 Vision AI
+              </Link>
+              <Link
+                href="/uang"
+                className="text-gray-600 hover:text-primary hover:bg-primary/5 flex items-center gap-2 px-4 py-3 text-base font-medium rounded-md transition-colors ml-2"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                <Banknote className="w-4 h-4 text-emerald-500" />
+                Deteksi Uang
               </Link>
               {user && !isTherapist && (
                 <Link

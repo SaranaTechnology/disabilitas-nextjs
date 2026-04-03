@@ -104,6 +104,87 @@ html {
   --sidebar-ring: 262 83% 65%;
 }
 
+/* Skeleton loader */
+.skeleton {
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  animation: skeleton-shimmer 1.5s ease-in-out infinite;
+  border-radius: 0.5rem;
+}
+
+@keyframes skeleton-shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* Warm category badge colors */
+.badge-kesehatan { background: linear-gradient(135deg, #f0abfc, #c084fc); color: #581c87; }
+.badge-terapi { background: linear-gradient(135deg, #6ee7b7, #34d399); color: #064e3b; }
+.badge-hukum { background: linear-gradient(135deg, #fbbf24, #f59e0b); color: #78350f; }
+.badge-teknologi { background: linear-gradient(135deg, #60a5fa, #3b82f6); color: #1e3a5f; }
+.badge-pendidikan { background: linear-gradient(135deg, #fb923c, #f97316); color: #7c2d12; }
+.badge-karir { background: linear-gradient(135deg, #a78bfa, #8b5cf6); color: #3b0764; }
+.badge-sosial { background: linear-gradient(135deg, #f472b6, #ec4899); color: #831843; }
+.badge-aksesibilitas { background: linear-gradient(135deg, #2dd4bf, #14b8a6); color: #134e4a; }
+.badge-olahraga { background: linear-gradient(135deg, #fb7185, #f43f5e); color: #881337; }
+.badge-keluarga { background: linear-gradient(135deg, #fdba74, #fb923c); color: #7c2d12; }
+
+/* Article card styles */
+.article-card {
+  position: relative;
+  overflow: hidden;
+  border-radius: 1rem;
+  background: white;
+  border: 1px solid hsl(var(--border));
+  transition: all 0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+}
+
+.article-card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 20px 40px rgba(124, 58, 237, 0.12), 0 8px 16px rgba(0,0,0,0.06);
+  border-color: hsl(262 83% 80%);
+}
+
+.article-card .card-image {
+  overflow: hidden;
+  position: relative;
+}
+
+.article-card .card-image img {
+  transition: transform 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.article-card:hover .card-image img {
+  transform: scale(1.08);
+}
+
+.article-card .card-image::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 40%;
+  background: linear-gradient(transparent, rgba(0,0,0,0.15));
+  pointer-events: none;
+}
+
+.article-card .card-body {
+  padding: 1.25rem 1.5rem 1.5rem;
+}
+
+.article-card .card-title {
+  font-weight: 700;
+  line-height: 1.4;
+  color: hsl(var(--foreground));
+  transition: color 0.2s ease;
+}
+
+.article-card:hover .card-title {
+  color: hsl(262 83% 50%);
+}
+
 @layer base {
   * {
     @apply border-border;
