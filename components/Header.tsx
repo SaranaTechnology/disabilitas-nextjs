@@ -69,13 +69,11 @@ const Header = () => {
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
           <Link href="/" className="flex items-center group">
-            <Image
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
               src="/logo.svg"
               alt="DisabilitasKu"
-              width={200}
-              height={60}
               className="h-9 w-auto group-hover:scale-[1.02] transition-transform"
-              priority
             />
           </Link>
 

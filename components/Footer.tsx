@@ -46,11 +46,10 @@ const Footer = () => {
           {/* Brand Section */}
           <div className="lg:col-span-1">
             <Link href="/" className="flex items-center mb-4">
-              <Image
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
                 src="/icon-dark.svg"
                 alt=""
-                width={40}
-                height={40}
                 className="w-10 h-10 rounded-lg mr-3"
               />
               <span className="text-xl font-bold">
