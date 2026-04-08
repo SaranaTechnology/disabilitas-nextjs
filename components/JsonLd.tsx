@@ -18,7 +18,7 @@ export function OrganizationJsonLd() {
     name: 'DisabilitasKu',
     description: 'Platform inklusif yang menghubungkan penyandang disabilitas dengan layanan terapi profesional dan dukungan komunitas di Indonesia.',
     url: 'https://disabilitasku.id',
-    logo: 'https://disabilitasku.id/favicon.ico',
+    logo: 'https://disabilitasku.id/icon-gradient-512.png',
     foundingDate: '2024',
     founder: {
       '@type': 'Person',
@@ -135,7 +135,7 @@ export function ArticleJsonLd({
       name: 'DisabilitasKu',
       logo: {
         '@type': 'ImageObject',
-        url: 'https://disabilitasku.id/favicon.ico',
+        url: 'https://disabilitasku.id/icon-gradient-512.png',
       },
     },
   };

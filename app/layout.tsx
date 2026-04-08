@@ -44,6 +44,15 @@ export const metadata: Metadata = {
       "max-snippet": -1,
     },
   },
+  icons: {
+    icon: [
+      { url: '/favicon.svg', type: 'image/svg+xml' },
+      { url: '/favicon-32x32.png', sizes: '32x32', type: 'image/png' },
+    ],
+    apple: [
+      { url: '/apple-touch-icon.png', sizes: '180x180' },
+    ],
+  },
   openGraph: {
     type: "website",
     locale: "id_ID",
@@ -51,6 +60,14 @@ export const metadata: Metadata = {
     siteName: "DisabilitasKu",
     title: "DisabilitasKu - Platform Inklusif untuk Penyandang Disabilitas Indonesia",
     description: "Platform inklusif yang menghubungkan penyandang disabilitas dengan layanan terapi profesional, konsultasi online, forum komunitas, dan dukungan di Indonesia.",
+    images: [
+      {
+        url: '/logo-1200.png',
+        width: 1200,
+        height: 360,
+        alt: 'DisabilitasKu',
+      },
+    ],
   },
   twitter: {
     card: "summary_large_image",

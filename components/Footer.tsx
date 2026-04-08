@@ -2,6 +2,7 @@
 
 
 import { Facebook, Instagram, Mail, Phone, MapPin, Linkedin } from 'lucide-react';
+import Image from 'next/image';
 import Link from 'next/link';
 
 const TikTokIcon = ({ size = 24 }: { size?: number }) => (
@@ -45,11 +46,15 @@ const Footer = () => {
           {/* Brand Section */}
           <div className="lg:col-span-1">
             <Link href="/" className="flex items-center mb-4">
-              <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-primary mr-3">
-                <span className="text-white font-bold text-lg">D</span>
-              </div>
+              <Image
+                src="/icon-dark.svg"
+                alt=""
+                width={40}
+                height={40}
+                className="w-10 h-10 rounded-lg mr-3"
+              />
               <span className="text-xl font-bold">
-                Disabilitas<span className="text-primary">Ku</span>
+                Disabilitas<span className="text-violet-400">Ku</span>
               </span>
             </Link>
             <p className="text-gray-300 mb-6 leading-relaxed">

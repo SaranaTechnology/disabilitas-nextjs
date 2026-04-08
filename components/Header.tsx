@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Menu, X, Shield, LogOut, User, Calendar, LayoutDashboard, ChevronDown, Hand, Eye, Banknote, Sparkles } from 'lucide-react';
+import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
@@ -68,12 +69,14 @@ const Header = () => {
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
           <Link href="/" className="flex items-center group">
-            <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-primary mr-3 group-hover:scale-105 transition-transform">
-              <span className="text-white font-bold text-lg">D</span>
-            </div>
-            <span className="text-xl font-bold text-gray-900">
-              Disabilitas<span className="text-primary">Ku</span>
-            </span>
+            <Image
+              src="/logo.svg"
+              alt="DisabilitasKu"
+              width={200}
+              height={60}
+              className="h-9 w-auto group-hover:scale-[1.02] transition-transform"
+              priority
+            />
           </Link>
 
           {/* Desktop Navigation */}
