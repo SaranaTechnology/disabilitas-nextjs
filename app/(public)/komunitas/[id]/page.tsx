@@ -1,10 +1,15 @@
 import type { Metadata } from 'next';
-import { getCommunityForSEO, SITE_URL } from '@/lib/api/seo';
+import { getCommunityForSEO, getAllCommunityIds, SITE_URL } from '@/lib/api/seo';
 import { BreadcrumbJsonLd } from '@/components/JsonLd';
 import KomunitasDetailClient from './_components/KomunitasDetailClient';
 
 interface Props {
   params: Promise<{ id: string }>;
+}
+
+export async function generateStaticParams() {
+  const communities = await getAllCommunityIds();
+  return communities.map((c) => ({ id: c.id }));
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {

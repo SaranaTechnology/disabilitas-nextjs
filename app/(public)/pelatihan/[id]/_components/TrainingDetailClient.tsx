@@ -286,6 +286,9 @@ export default function TrainingDetailClient() {
                   <img
                     src={training.organizer_logo}
                     alt={training.organizer_name}
+                    decoding="async"
+                    width={64}
+                    height={64}
                     className="w-16 h-16 rounded-xl object-cover flex-shrink-0"
                   />
                 ) : (

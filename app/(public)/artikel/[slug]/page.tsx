@@ -1,10 +1,15 @@
 import type { Metadata } from 'next';
-import { getArticleForSEO, SITE_URL } from '@/lib/api/seo';
+import { getArticleForSEO, getAllArticleSlugs, SITE_URL, parseTags } from '@/lib/api/seo';
 import { ArticleJsonLd, BreadcrumbJsonLd } from '@/components/JsonLd';
 import ArticleDetailClient from './_components/ArticleDetailClient';
 
 interface Props {
   params: Promise<{ slug: string }>;
+}
+
+export async function generateStaticParams() {
+  const articles = await getAllArticleSlugs();
+  return articles.map((a) => ({ slug: a.slug }));
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
@@ -20,7 +25,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
   const description = article.excerpt || `Baca artikel "${article.title}" di DisabilitasKu.`;
   const url = `${SITE_URL}/artikel/${slug}`;
-  const keywords = article.tags?.split(',').map((t) => t.trim()).filter(Boolean) || [];
+  const keywords = parseTags(article.tags);
 
   return {
     title: article.title,

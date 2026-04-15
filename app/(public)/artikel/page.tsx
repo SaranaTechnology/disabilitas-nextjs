@@ -178,6 +178,8 @@ export default function ArticlesPage() {
                       <img
                         src={article.cover_image}
                         alt={article.title}
+                        loading="lazy"
+                        decoding="async"
                         className="w-full h-full object-cover"
                       />
                     ) : (

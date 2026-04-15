@@ -1,11 +1,7 @@
-'use client';
-
 import { ArrowRight, Heart, Users, Hand, Eye, Banknote, CheckCircle } from 'lucide-react';
-import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 
 const ServicesSection = () => {
-  const router = useRouter();
-
   const services = [
     {
       id: 'layanan-kesehatan',
@@ -94,10 +90,10 @@ const ServicesSection = () => {
           {services.map((service) => {
             const IconComponent = service.icon;
             return (
-              <div
+              <Link
                 key={service.id}
-                onClick={() => router.push(service.href)}
-                className={`group relative rounded-2xl ${service.lightBg} border border-white/60 p-6 sm:p-8 cursor-pointer transition-all duration-350 hover:shadow-xl hover:-translate-y-1`}
+                href={service.href}
+                className={`group relative block rounded-2xl ${service.lightBg} border border-white/60 p-6 sm:p-8 cursor-pointer transition-all duration-350 hover:shadow-xl hover:-translate-y-1`}
               >
                 {/* Icon */}
                 <div className={`w-14 h-14 rounded-2xl ${service.iconBg} flex items-center justify-center mb-5 group-hover:scale-110 transition-transform duration-300`}>
@@ -130,7 +126,7 @@ const ServicesSection = () => {
 
                 {/* Hover gradient border effect */}
                 <div className={`absolute inset-0 rounded-2xl bg-gradient-to-r ${service.gradient} opacity-0 group-hover:opacity-[0.06] transition-opacity duration-300 pointer-events-none`} />
-              </div>
+              </Link>
             );
           })}
         </div>

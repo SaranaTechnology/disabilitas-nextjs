@@ -1,14 +1,13 @@
 'use client';
 
-
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
+import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { MapPin, CheckCircle, Phone, Globe, Mail } from 'lucide-react';
-import { apiClient } from '@/lib/api/client';
+import { MapPin, CheckCircle, Phone, Globe, Mail, Loader2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
 interface TherapyLocation {
@@ -26,12 +25,20 @@ interface TherapyLocation {
   services: string[];
 }
 
+const PAGE_SIZE = 12;
+
 const TherapyLocationFinder = () => {
+  const router = useRouter();
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedType, setSelectedType] = useState('all');
   const [locations, setLocations] = useState<TherapyLocation[]>([]);
+  const [total, setTotal] = useState(0);
+  const [offset, setOffset] = useState(0);
   const [loading, setLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
   const { toast } = useToast();
+  const sentinelRef = useRef<HTMLDivElement>(null);
+  const fetchRef = useRef({ search: '', type: 'all' });
 
   const locationTypes = [
     { value: 'yayasan', label: 'Yayasan' },
@@ -42,20 +49,35 @@ const TherapyLocationFinder = () => {
     { value: 'lainnya', label: 'Lainnya' },
   ];
 
-  useEffect(() => {
-    fetchLocations();
-  }, []);
+  const hasMore = locations.length < total;
 
-  const fetchLocations = async () => {
+  const fetchLocations = useCallback(async (currentOffset: number, search: string, type: string, append: boolean) => {
+    if (append) {
+      setLoadingMore(true);
+    } else {
+      setLoading(true);
+    }
     try {
-      const response = await apiClient.public.therapists.list({page_size: 50 });
+      const qs = new URLSearchParams();
+      if (search) qs.set('search', search);
+      if (type !== 'all') qs.set('type', type);
+      qs.set('limit', String(PAGE_SIZE));
+      qs.set('offset', String(currentOffset));
 
-      if (response.error) {
-        throw new Error(response.error);
+      const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || '';
+      const res = await fetch(`${baseUrl}/public/therapists?${qs.toString()}`);
+      const json = await res.json();
+
+      const data = Array.isArray(json.data) ? json.data as TherapyLocation[] : [];
+      const metaTotal = json.meta?.total ?? 0;
+
+      if (append) {
+        setLocations((prev) => [...prev, ...data]);
+      } else {
+        setLocations(data);
       }
-
-      const data = Array.isArray(response.data) ? response.data as unknown as TherapyLocation[] : [];
-      setLocations(data);
+      setTotal(metaTotal);
+      setOffset(currentOffset + data.length);
     } catch (error) {
       console.error('Error fetching locations:', error);
       toast({
@@ -65,30 +87,39 @@ const TherapyLocationFinder = () => {
       });
     } finally {
       setLoading(false);
+      setLoadingMore(false);
     }
-  };
+  }, [toast]);
 
-  const filteredLocations = locations.filter(loc => {
-    const searchLower = searchTerm.toLowerCase();
-    const matchesSearch = loc.name.toLowerCase().includes(searchLower) ||
-                         (loc.type_label && loc.type_label.toLowerCase().includes(searchLower)) ||
-                         (loc.address && loc.address.toLowerCase().includes(searchLower)) ||
-                         (loc.city_name && loc.city_name.toLowerCase().includes(searchLower));
-    const matchesType = selectedType === 'all' || loc.type === selectedType;
+  // Initial fetch + reset when search/type changes (debounced)
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      fetchRef.current = { search: searchTerm, type: selectedType };
+      setOffset(0);
+      fetchLocations(0, searchTerm, selectedType, false);
+    }, 400);
+    return () => clearTimeout(timer);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchTerm, selectedType, fetchLocations]);
 
-    return matchesSearch && matchesType;
-  });
+  // Infinite scroll with IntersectionObserver
+  useEffect(() => {
+    const sentinel = sentinelRef.current;
+    if (!sentinel) return;
 
-  if (loading) {
-    return (
-      <section className="py-20 px-4 bg-gray-50">
-        <div className="max-w-7xl mx-auto text-center">
-          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary mx-auto"></div>
-          <p className="mt-4 text-gray-600">Memuat data lokasi...</p>
-        </div>
-      </section>
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting && hasMore && !loading && !loadingMore) {
+          const { search, type } = fetchRef.current;
+          fetchLocations(offset, search, type, true);
+        }
+      },
+      { rootMargin: '200px' }
     );
-  }
+
+    observer.observe(sentinel);
+    return () => observer.disconnect();
+  }, [hasMore, loading, loadingMore, offset, fetchLocations]);
 
   return (
     <section id="layanan" className="py-20 px-4 bg-gray-50">
@@ -125,7 +156,7 @@ const TherapyLocationFinder = () => {
                 Tipe Lokasi
               </label>
               <Select value={selectedType} onValueChange={setSelectedType}>
-                <SelectTrigger id="type-select" className="focus:ring-2 focus:ring-primary">
+                <SelectTrigger id="type-select" aria-label="Pilih tipe lokasi terapi" className="focus:ring-2 focus:ring-primary">
                   <SelectValue placeholder="Pilih tipe" />
                 </SelectTrigger>
                 <SelectContent>
@@ -143,106 +174,134 @@ const TherapyLocationFinder = () => {
         <div className="space-y-6">
           <div className="flex justify-between items-center">
             <h3 className="text-xl font-semibold text-gray-900">
-              Hasil Pencarian ({filteredLocations.length} lokasi)
+              Hasil Pencarian ({total} lokasi)
             </h3>
+            {locations.length > 0 && (
+              <p className="text-sm text-gray-500">
+                Menampilkan {locations.length} dari {total}
+              </p>
+            )}
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredLocations.map((loc) => (
-              <Card key={loc.id} className="hover:shadow-lg transition-shadow duration-300 border border-gray-200">
-                <CardHeader className="pb-4">
-                  <div className="flex items-start justify-between">
-                    <div className="flex-1">
-                      <CardTitle className="text-lg font-semibold text-gray-900 mb-1">
-                        {loc.name}
-                      </CardTitle>
-                      <CardDescription className="text-primary font-medium">
-                        {loc.type_label}
-                      </CardDescription>
-                    </div>
-                    {loc.is_verified && (
-                      <div className="px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800 flex items-center gap-1">
-                        <CheckCircle size={12} />
-                        Terverifikasi
+          {loading ? (
+            <div className="text-center py-12">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
+              <p className="mt-4 text-gray-600">Memuat data lokasi...</p>
+            </div>
+          ) : locations.length === 0 ? (
+            <div className="text-center py-12">
+              <p className="text-gray-500">Tidak ada lokasi yang ditemukan.</p>
+            </div>
+          ) : (
+            <>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {locations.map((loc) => (
+                  <Card key={loc.id} className="hover:shadow-lg transition-shadow duration-300 border border-gray-200">
+                    <CardHeader className="pb-4">
+                      <div className="flex items-start justify-between">
+                        <div className="flex-1">
+                          <CardTitle className="text-lg font-semibold text-gray-900 mb-1">
+                            {loc.name}
+                          </CardTitle>
+                          <CardDescription className="text-primary font-medium">
+                            {loc.type_label}
+                          </CardDescription>
+                        </div>
+                        {loc.is_verified && (
+                          <div className="px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800 flex items-center gap-1">
+                            <CheckCircle size={12} />
+                            Terverifikasi
+                          </div>
+                        )}
                       </div>
-                    )}
-                  </div>
-                </CardHeader>
+                    </CardHeader>
 
-                <CardContent className="space-y-4">
-                  <div className="flex items-start text-sm text-gray-600">
-                    <MapPin size={16} className="mr-2 mt-0.5 text-gray-400 flex-shrink-0" aria-hidden="true" />
-                    <span>{loc.address}{loc.city_name ? `, ${loc.city_name}` : ''}</span>
-                  </div>
-
-                  {(loc.phone || loc.email || loc.website) && (
-                    <div className="space-y-2 text-sm text-gray-600">
-                      {loc.phone && (
-                        <div className="flex items-center">
-                          <Phone size={14} className="mr-2 text-gray-400" aria-hidden="true" />
-                          <span>{loc.phone}</span>
-                        </div>
-                      )}
-                      {loc.email && (
-                        <div className="flex items-center">
-                          <Mail size={14} className="mr-2 text-gray-400" aria-hidden="true" />
-                          <span>{loc.email}</span>
-                        </div>
-                      )}
-                      {loc.website && (
-                        <div className="flex items-center">
-                          <Globe size={14} className="mr-2 text-gray-400" aria-hidden="true" />
-                          <a href={loc.website} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline truncate">
-                            {loc.website.replace(/^https?:\/\//, '')}
-                          </a>
-                        </div>
-                      )}
-                    </div>
-                  )}
-
-                  {loc.description && (
-                    <div className="text-sm text-gray-600">
-                      <p className="line-clamp-2">{loc.description}</p>
-                    </div>
-                  )}
-
-                  {loc.services && loc.services.length > 0 && (
-                    <div className="space-y-2">
-                      <div>
-                        <span className="text-sm font-medium text-gray-700">Layanan:</span>
-                        <div className="flex flex-wrap gap-1 mt-1">
-                          {loc.services.map((service) => (
-                            <Badge key={service} variant="secondary" className="text-xs">
-                              {service}
-                            </Badge>
-                          ))}
-                        </div>
+                    <CardContent className="space-y-4">
+                      <div className="flex items-start text-sm text-gray-600">
+                        <MapPin size={16} className="mr-2 mt-0.5 text-gray-400 flex-shrink-0" aria-hidden="true" />
+                        <span>{loc.address}{loc.city_name ? `, ${loc.city_name}` : ''}</span>
                       </div>
-                    </div>
-                  )}
 
-                  <div className="pt-4">
-                    <Button
-                      variant="outline"
-                      className="w-full border-primary text-primary hover:bg-primary/5 focus:ring-2 focus:ring-primary"
-                      aria-label={`Lihat detail ${loc.name}`}
-                    >
-                      <MapPin size={16} className="mr-2" />
-                      Lihat Detail
-                    </Button>
+                      {(loc.phone || loc.email || loc.website) && (
+                        <div className="space-y-2 text-sm text-gray-600">
+                          {loc.phone && (
+                            <div className="flex items-center">
+                              <Phone size={14} className="mr-2 text-gray-400" aria-hidden="true" />
+                              <span>{loc.phone}</span>
+                            </div>
+                          )}
+                          {loc.email && (
+                            <div className="flex items-center">
+                              <Mail size={14} className="mr-2 text-gray-400" aria-hidden="true" />
+                              <span>{loc.email}</span>
+                            </div>
+                          )}
+                          {loc.website && (
+                            <div className="flex items-center">
+                              <Globe size={14} className="mr-2 text-gray-400" aria-hidden="true" />
+                              <a href={loc.website} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline truncate">
+                                {loc.website.replace(/^https?:\/\//, '')}
+                              </a>
+                            </div>
+                          )}
+                        </div>
+                      )}
+
+                      {loc.description && (
+                        <div className="text-sm text-gray-600">
+                          <p className="line-clamp-2">{loc.description}</p>
+                        </div>
+                      )}
+
+                      {loc.services && loc.services.length > 0 && (
+                        <div className="space-y-2">
+                          <div>
+                            <span className="text-sm font-medium text-gray-700">Layanan:</span>
+                            <div className="flex flex-wrap gap-1 mt-1">
+                              {loc.services.map((service) => (
+                                <Badge key={service} variant="secondary" className="text-xs">
+                                  {service}
+                                </Badge>
+                              ))}
+                            </div>
+                          </div>
+                        </div>
+                      )}
+
+                      <div className="pt-4">
+                        <Button
+                          variant="outline"
+                          className="w-full border-primary text-primary hover:bg-primary/5 focus:ring-2 focus:ring-primary"
+                          aria-label={`Lihat detail ${loc.name}`}
+                          onClick={() => router.push(`/lokasi-terapi/${loc.id}`)}
+                        >
+                          <MapPin size={16} className="mr-2" />
+                          Lihat Detail
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+
+              {/* Infinite scroll sentinel */}
+              <div ref={sentinelRef} className="py-8 text-center">
+                {loadingMore && (
+                  <div className="flex items-center justify-center gap-2 text-gray-500">
+                    <Loader2 className="h-5 w-5 animate-spin" />
+                    <span>Memuat lebih banyak...</span>
                   </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
+                )}
+                {!hasMore && locations.length > 0 && (
+                  <p className="text-sm text-gray-600">Semua lokasi telah ditampilkan</p>
+                )}
+              </div>
+            </>
+          )}
         </div>
       </div>
-
     </section>
   );
 };
 
 export default TherapyLocationFinder;
-
-// Booking Dialog Component within same file render
-// Add the dialog at bottom of component render

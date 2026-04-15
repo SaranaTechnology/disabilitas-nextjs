@@ -38,11 +38,22 @@ function useAnimatedCount(target: number, duration = 1500) {
   return { count, ref };
 }
 
-const HeroSection = () => {
+interface HeroStats {
+  therapy: number;
+  articles: number;
+  forum: number;
+}
+
+interface HeroSectionProps {
+  initialStats?: HeroStats;
+}
+
+const HeroSection = ({ initialStats }: HeroSectionProps = {}) => {
   const router = useRouter();
-  const [stats, setStats] = useState({ therapy: 0, articles: 0, forum: 0 });
+  const [stats, setStats] = useState<HeroStats>(initialStats || { therapy: 0, articles: 0, forum: 0 });
 
   useEffect(() => {
+    if (initialStats) return;
     const fetchStats = async () => {
       try {
         const [therapistsRes, articlesRes, forumRes] = await Promise.all([
@@ -60,7 +71,7 @@ const HeroSection = () => {
       }
     };
     fetchStats();
-  }, []);
+  }, [initialStats]);
 
   const therapyCounter = useAnimatedCount(stats.therapy);
   const articlesCounter = useAnimatedCount(stats.articles);
@@ -103,12 +114,12 @@ const HeroSection = () => {
               }}
             >
               <div className="flex items-center gap-3 flex-1 px-4 py-3 rounded-xl bg-gray-50/80">
-                <Search className="w-5 h-5 text-gray-400 flex-shrink-0" />
-                <span className="text-gray-400 text-left">Cari terapi, klinik, atau layanan...</span>
+                <Search className="w-5 h-5 text-gray-500 flex-shrink-0" />
+                <span className="text-gray-600 text-left">Cari terapi, klinik, atau layanan...</span>
               </div>
               <div className="flex items-center gap-3 flex-1 px-4 py-3 rounded-xl bg-gray-50/80 sm:border-l border-gray-200">
-                <MapPin className="w-5 h-5 text-gray-400 flex-shrink-0" />
-                <span className="text-gray-400 text-left">Jakarta, Bandung, Surabaya...</span>
+                <MapPin className="w-5 h-5 text-gray-500 flex-shrink-0" />
+                <span className="text-gray-600 text-left">Jakarta, Bandung, Surabaya...</span>
               </div>
               <Button
                 size="lg"
@@ -176,7 +187,7 @@ const HeroSection = () => {
         </div>
 
         {/* Trust signals */}
-        <div className="flex flex-wrap items-center justify-center gap-6 mt-10 text-sm text-gray-400">
+        <div className="flex flex-wrap items-center justify-center gap-6 mt-10 text-sm text-gray-600">
           <span className="flex items-center gap-1.5">
             <Shield className="w-4 h-4" />
             Data Terverifikasi

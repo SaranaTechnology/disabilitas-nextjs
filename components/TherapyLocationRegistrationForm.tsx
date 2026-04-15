@@ -189,7 +189,7 @@ const TherapyLocationRegistrationForm = () => {
                   <div className="space-y-2">
                     <Label>Negara</Label>
                     <Select value={selectedCountry} onValueChange={setSelectedCountry}>
-                      <SelectTrigger>
+                      <SelectTrigger aria-label="Pilih negara">
                         <SelectValue placeholder="Pilih negara" />
                       </SelectTrigger>
                       <SelectContent>
@@ -208,7 +208,7 @@ const TherapyLocationRegistrationForm = () => {
                       onValueChange={setSelectedState}
                       disabled={!selectedCountry}
                     >
-                      <SelectTrigger>
+                      <SelectTrigger aria-label="Pilih provinsi">
                         <SelectValue placeholder="Pilih provinsi" />
                       </SelectTrigger>
                       <SelectContent>
@@ -227,7 +227,7 @@ const TherapyLocationRegistrationForm = () => {
                       onValueChange={(value) => setFormData({ ...formData, city_code: value })}
                       disabled={!selectedState}
                     >
-                      <SelectTrigger>
+                      <SelectTrigger aria-label="Pilih kota atau kabupaten">
                         <SelectValue placeholder="Pilih kota" />
                       </SelectTrigger>
                       <SelectContent>

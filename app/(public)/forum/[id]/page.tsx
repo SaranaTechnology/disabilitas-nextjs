@@ -1,116 +1,91 @@
-'use client';
+import type { Metadata } from 'next';
+import { getForumThreadForSEO, getAllForumThreadIds, SITE_URL, truncate, parseTags } from '@/lib/api/seo';
+import { ForumPostingJsonLd, BreadcrumbJsonLd } from '@/components/JsonLd';
+import ThreadClient from './_components/ThreadClient';
 
-import { useEffect, useState } from 'react';
-import { useParams } from 'next/navigation';
-import Link from 'next/link';
-import { apiClient, type ForumThread, type ForumComment } from '@/lib/api/client';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
-import { useAuth } from '@/hooks/useAuth';
-import { useToast } from '@/hooks/use-toast';
-import { ArrowLeft } from 'lucide-react';
+interface Props {
+  params: Promise<{ id: string }>;
+}
 
-export default function ThreadPage() {
-  const params = useParams();
-  const id = params.id as string;
-  const [thread, setThread] = useState<(ForumThread & { comments: ForumComment[] }) | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [comment, setComment] = useState('');
-  const { user } = useAuth();
-  const { toast } = useToast();
+export async function generateStaticParams() {
+  const threads = await getAllForumThreadIds();
+  return threads.map((t) => ({ id: t.id }));
+}
 
-  const load = async () => {
-    if (!id) return;
-    setLoading(true);
-    const res = await apiClient.forum.getThread(id);
-    if (!res.error && res.data) setThread(res.data as any);
-    setLoading(false);
-  };
-
-  useEffect(() => { load(); }, [id]);
-
-  const addComment = async () => {
-    if (!user || !id) {
-      toast({ title: 'Perlu login', description: 'Silakan login untuk berkomentar', variant: 'destructive' });
-      return;
-    }
-    if (!comment) return;
-    const res = await apiClient.forum.addComment(id, { user_id: user.id, body: comment });
-    if (res.error) {
-      toast({ title: 'Gagal', description: res.error, variant: 'destructive' });
-      return;
-    }
-    setComment('');
-    await load();
-  };
-
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-gray-50">
-        <main className="py-12 px-4 max-w-3xl mx-auto">
-          <div className="text-center py-12">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
-            <p className="mt-4 text-gray-600">Memuat diskusi...</p>
-          </div>
-        </main>
-      </div>
-    );
-  }
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { id } = await params;
+  const thread = await getForumThreadForSEO(id);
 
   if (!thread) {
-    return (
-      <div className="min-h-screen bg-gray-50">
-        <main className="py-12 px-4 max-w-3xl mx-auto text-center">
-          <h1 className="text-2xl font-bold text-gray-900 mb-4">Diskusi tidak ditemukan</h1>
-          <Link href="/forum">
-            <Button className="bg-primary hover:bg-primary/90">Kembali ke Forum</Button>
-          </Link>
-        </main>
-      </div>
-    );
+    return {
+      title: 'Diskusi Tidak Ditemukan',
+      description: 'Diskusi forum yang Anda cari tidak ditemukan di DisabilitasKu.',
+    };
   }
 
+  const description = truncate(thread.body) || `Diskusi "${thread.title}" di forum komunitas DisabilitasKu.`;
+  const url = `${SITE_URL}/forum/${id}`;
+  const tags = parseTags(thread.tags);
+
+  return {
+    title: thread.title,
+    description,
+    keywords: ['forum disabilitas', 'diskusi disabilitas', 'komunitas disabilitas', ...tags],
+    authors: [{ name: thread.user?.full_name || 'Pengguna DisabilitasKu' }],
+    openGraph: {
+      title: thread.title,
+      description,
+      url,
+      type: 'article',
+      locale: 'id_ID',
+      siteName: 'DisabilitasKu',
+      publishedTime: thread.created_at,
+      modifiedTime: thread.updated_at,
+      authors: [thread.user?.full_name || 'Pengguna DisabilitasKu'],
+    },
+    twitter: {
+      card: 'summary',
+      title: thread.title,
+      description,
+    },
+    alternates: {
+      canonical: url,
+    },
+  };
+}
+
+export default async function ThreadPage({ params }: Props) {
+  const { id } = await params;
+  const thread = await getForumThreadForSEO(id);
+
   return (
-    <div className="min-h-screen bg-gray-50">
-      <main className="py-12 px-4 max-w-3xl mx-auto space-y-6">
-        <Link href="/forum" className="inline-flex items-center text-gray-600 hover:text-primary mb-4">
-          <ArrowLeft className="w-4 h-4 mr-2" />
-          Kembali ke Forum
-        </Link>
-
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-2xl">{thread.title}</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="whitespace-pre-wrap text-gray-800">{thread.body}</p>
-            <div className="text-xs text-gray-500 mt-4 pt-4 border-t">
-              Oleh: {thread.user?.full_name || thread.user?.email || 'Pengguna'} • {new Date(thread.created_at).toLocaleString('id-ID')}
-            </div>
-          </CardContent>
-        </Card>
-
-        <div className="space-y-3">
-          <h2 className="text-lg font-semibold">Komentar ({thread.comments?.length || 0})</h2>
-          {thread.comments?.length === 0 && <div className="text-sm text-gray-600 py-4">Belum ada komentar. Jadilah yang pertama berkomentar!</div>}
-          {thread.comments?.map((c) => (
-            <Card key={c.id}>
-              <CardContent className="pt-4">
-                <div className="text-sm">{c.body}</div>
-                <div className="text-xs text-gray-500 mt-2">{c.user?.full_name || c.user?.email || 'Pengguna'} • {new Date(c.created_at).toLocaleString('id-ID')}</div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-
-        {user && (
-          <div className="flex gap-2">
-            <Input placeholder="Tulis komentar..." value={comment} onChange={e => setComment(e.target.value)} />
-            <Button onClick={addComment} className="bg-primary hover:bg-primary/90">Kirim</Button>
-          </div>
-        )}
-      </main>
-    </div>
+    <>
+      {thread && (
+        <>
+          <ForumPostingJsonLd
+            headline={thread.title}
+            text={thread.body}
+            url={`${SITE_URL}/forum/${id}`}
+            datePublished={thread.created_at}
+            dateModified={thread.updated_at}
+            authorName={thread.user?.full_name}
+            commentCount={thread.comments?.length ?? thread.reply_count}
+            comments={thread.comments?.slice(0, 10).map((c) => ({
+              body: c.body,
+              created_at: c.created_at,
+              authorName: c.user?.full_name,
+            }))}
+          />
+          <BreadcrumbJsonLd
+            items={[
+              { name: 'Beranda', url: SITE_URL },
+              { name: 'Forum', url: `${SITE_URL}/forum` },
+              { name: thread.title, url: `${SITE_URL}/forum/${id}` },
+            ]}
+          />
+        </>
+      )}
+      <ThreadClient />
+    </>
   );
 }

@@ -1,10 +1,15 @@
 import type { Metadata } from 'next';
-import { getEventForSEO, SITE_URL } from '@/lib/api/seo';
+import { getEventForSEO, getAllEventIds, SITE_URL } from '@/lib/api/seo';
 import { EventJsonLd, BreadcrumbJsonLd } from '@/components/JsonLd';
 import AcaraDetailClient from './_components/AcaraDetailClient';
 
 interface Props {
   params: Promise<{ id: string }>;
+}
+
+export async function generateStaticParams() {
+  const events = await getAllEventIds();
+  return events.map((e) => ({ id: e.id }));
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {

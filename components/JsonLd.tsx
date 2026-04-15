@@ -186,6 +186,131 @@ export function EventJsonLd({
   return <JsonLd data={data} />;
 }
 
+const therapyTypeMapping: Record<string, string> = {
+  yayasan: 'MedicalBusiness',
+  klinik: 'MedicalClinic',
+  rumah_sakit: 'Hospital',
+  praktek_mandiri: 'MedicalBusiness',
+  puskesmas: 'GovernmentOffice',
+  lainnya: 'MedicalBusiness',
+};
+
+const dayOfWeekSchema = [
+  'https://schema.org/Sunday',
+  'https://schema.org/Monday',
+  'https://schema.org/Tuesday',
+  'https://schema.org/Wednesday',
+  'https://schema.org/Thursday',
+  'https://schema.org/Friday',
+  'https://schema.org/Saturday',
+];
+
+import type { TherapyLocationSEO } from '@/lib/api/seo';
+
+export function TherapyLocationJsonLd({ location, url }: { location: TherapyLocationSEO; url: string }) {
+  const schemaType = (location.type && therapyTypeMapping[location.type]) || 'MedicalBusiness';
+  const data: Record<string, unknown> = {
+    '@context': 'https://schema.org',
+    '@type': schemaType,
+    name: location.name,
+    description: location.description || `Lokasi terapi ${location.name} di ${location.city_name || 'Indonesia'}.`,
+    url,
+    address: {
+      '@type': 'PostalAddress',
+      streetAddress: location.address,
+      addressLocality: location.city_name,
+      addressCountry: 'ID',
+    },
+    medicalSpecialty: 'PhysicalTherapy',
+  };
+
+  if (location.phone) data.telephone = location.phone;
+  if (location.email) data.email = location.email;
+  if (location.website) data.sameAs = [location.website];
+  if (location.latitude && location.longitude && location.latitude !== 0 && location.longitude !== 0) {
+    data.geo = {
+      '@type': 'GeoCoordinates',
+      latitude: location.latitude,
+      longitude: location.longitude,
+    };
+  }
+  if (location.open_hours && location.open_hours.length > 0) {
+    data.openingHoursSpecification = location.open_hours.map((h) => ({
+      '@type': 'OpeningHoursSpecification',
+      dayOfWeek: dayOfWeekSchema[h.day_of_week],
+      opens: h.open_time,
+      closes: h.close_time,
+    }));
+  }
+  if (location.services && location.services.length > 0) {
+    data.availableService = location.services.map((s) => ({
+      '@type': 'MedicalTherapy',
+      name: s,
+    }));
+  }
+  data.identifier = {
+    '@type': 'PropertyValue',
+    name: 'verified',
+    value: location.is_verified ? 'true' : 'false',
+  };
+
+  return <JsonLd data={data} />;
+}
+
+export function ForumPostingJsonLd({
+  headline,
+  text,
+  url,
+  datePublished,
+  dateModified,
+  authorName,
+  commentCount,
+  comments,
+}: {
+  headline: string;
+  text: string;
+  url: string;
+  datePublished: string;
+  dateModified?: string;
+  authorName?: string;
+  commentCount?: number;
+  comments?: { body: string; created_at: string; authorName?: string }[];
+}) {
+  const data: Record<string, unknown> = {
+    '@context': 'https://schema.org',
+    '@type': 'DiscussionForumPosting',
+    headline,
+    articleBody: text,
+    url,
+    datePublished,
+    dateModified: dateModified || datePublished,
+    author: {
+      '@type': 'Person',
+      name: authorName || 'Pengguna DisabilitasKu',
+    },
+    publisher: {
+      '@type': 'Organization',
+      name: 'DisabilitasKu',
+      logo: {
+        '@type': 'ImageObject',
+        url: 'https://disabilitasku.id/icon-gradient-512.png',
+      },
+    },
+  };
+
+  if (typeof commentCount === 'number') data.commentCount = commentCount;
+  if (comments && comments.length > 0) {
+    data.comment = comments.map((c) => ({
+      '@type': 'Comment',
+      text: c.body,
+      dateCreated: c.created_at,
+      author: { '@type': 'Person', name: c.authorName || 'Pengguna DisabilitasKu' },
+    }));
+  }
+
+  return <JsonLd data={data} />;
+}
+
 export function HealthServiceJsonLd({
   name,
   description,

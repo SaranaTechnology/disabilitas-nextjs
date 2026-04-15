@@ -915,6 +915,12 @@ class ApiClient {
         method: 'POST',
         body: JSON.stringify(data),
       });
+    },
+    addAnonymousComment: async (threadId: string, data: { body: string; display_name?: string }) => {
+      return await this.makeRequest<ForumComment>(`/public/forum/threads/${threadId}/comments`, {
+        method: 'POST',
+        body: JSON.stringify(data),
+      });
     }
   };
 

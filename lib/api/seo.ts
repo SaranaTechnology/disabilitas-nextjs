@@ -4,8 +4,19 @@
  * (which uses localStorage) and work in Next.js server components.
  */
 
+import type { TherapyLocation, ForumThread, ForumComment } from './types';
+
 const BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8082/v1';
 export const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://disabilitasku.id';
+
+export function parseTags(csv?: string): string[] {
+  return csv?.split(',').map((t) => t.trim()).filter(Boolean) || [];
+}
+
+export function truncate(text: string, max = 160): string {
+  const clean = text.replace(/\s+/g, ' ').trim();
+  return clean.length > max ? `${clean.slice(0, max - 1)}…` : clean;
+}
 
 interface ArticleSEO {
   id: string;
@@ -58,6 +69,35 @@ interface CommunityListItem {
   created_at: string;
 }
 
+export type TherapyLocationSEO = Pick<
+  TherapyLocation,
+  | 'id'
+  | 'name'
+  | 'type'
+  | 'address'
+  | 'city_code'
+  | 'city_name'
+  | 'description'
+  | 'phone'
+  | 'email'
+  | 'website'
+  | 'latitude'
+  | 'longitude'
+  | 'is_verified'
+  | 'services'
+  | 'open_hours'
+  | 'created_at'
+  | 'updated_at'
+>;
+
+export type ForumThreadSEO = ForumThread & { comments?: ForumComment[] };
+
+interface BasicListItem {
+  id: string;
+  updated_at?: string;
+  created_at?: string;
+}
+
 async function seoFetch<T>(endpoint: string): Promise<T | null> {
   try {
     const res = await fetch(`${BASE_URL}${endpoint}`, {
@@ -79,7 +119,12 @@ async function seoFetchList<T>(endpoint: string): Promise<T[]> {
     if (!res.ok) return [];
     const json = await res.json();
     const result = json.data ?? json;
-    return Array.isArray(result) ? result : [];
+    const list = Array.isArray(result) ? (result as T[]) : [];
+    const limitMatch = endpoint.match(/[?&]limit=(\d+)/);
+    if (limitMatch && list.length === Number(limitMatch[1])) {
+      console.warn(`[sitemap-canary] ${endpoint} returned exactly ${list.length} items — list likely truncated, consider paginating with generateSitemaps()`);
+    }
+    return list;
   } catch {
     return [];
   }
@@ -107,4 +152,86 @@ export async function getAllEventIds() {
 
 export async function getAllCommunityIds() {
   return seoFetchList<CommunityListItem>('/communities?limit=1000');
+}
+
+type TherapyLocationDetailEnvelope =
+  | TherapyLocationSEO
+  | { summary: TherapyLocationSEO; open_hours?: TherapyLocation['open_hours'] };
+
+function hasSummary(
+  raw: TherapyLocationDetailEnvelope,
+): raw is { summary: TherapyLocationSEO; open_hours?: TherapyLocation['open_hours'] } {
+  return (raw as { summary?: TherapyLocationSEO }).summary !== undefined;
+}
+
+export async function getTherapyLocationForSEO(id: string): Promise<TherapyLocationSEO | null> {
+  const raw = await seoFetch<TherapyLocationDetailEnvelope>(`/therapy/locations/${id}`);
+  if (!raw) return null;
+  if (hasSummary(raw)) {
+    return { ...raw.summary, open_hours: raw.open_hours };
+  }
+  return raw;
+}
+
+export async function getAllTherapyLocationIds() {
+  return seoFetchList<BasicListItem>('/therapy/locations?limit=1000');
+}
+
+export async function getForumThreadForSEO(id: string) {
+  return seoFetch<ForumThreadSEO>(`/public/forum/threads/${id}`);
+}
+
+export async function getAllForumThreadIds() {
+  return seoFetchList<BasicListItem>('/public/forum/threads?limit=1000');
+}
+
+export async function getAllJobIds() {
+  return seoFetchList<BasicListItem>('/public/jobs?limit=1000');
+}
+
+export async function getAllTrainingIds() {
+  return seoFetchList<BasicListItem>('/public/trainings?limit=1000');
+}
+
+export async function getHomepageArticles(limit = 6) {
+  return seoFetchList<import('./types').ArticleSummary>(`/public/articles?limit=${limit}`);
+}
+
+export async function getHomepageThreads(limit = 4) {
+  return seoFetchList<ForumThread>(`/public/forum/threads?limit=${limit}`);
+}
+
+export async function getHomepageEvents(limit = 3) {
+  return seoFetchList<import('./types').Event>(`/events?limit=${limit}`);
+}
+
+interface ListMetaEnvelope {
+  data?: unknown[];
+  meta?: { total?: number };
+}
+
+async function seoFetchMeta(endpoint: string): Promise<{ total: number }> {
+  try {
+    const res = await fetch(`${BASE_URL}${endpoint}`, { next: { revalidate: 3600 } });
+    if (!res.ok) return { total: 0 };
+    const json: ListMetaEnvelope = await res.json();
+    return {
+      total: json.meta?.total ?? (Array.isArray(json.data) ? json.data.length : 0),
+    };
+  } catch {
+    return { total: 0 };
+  }
+}
+
+export async function getHomepageStats() {
+  const [therapists, articles, threads] = await Promise.all([
+    seoFetchMeta('/public/therapists?page_size=1'),
+    seoFetchMeta('/public/articles?limit=1'),
+    seoFetchMeta('/public/forum/threads'),
+  ]);
+  return {
+    therapy: therapists.total,
+    articles: articles.total,
+    forum: threads.total,
+  };
 }

@@ -352,6 +352,10 @@ export default function PelatihanPage() {
                             <img
                               src={training.organizer_logo}
                               alt={training.organizer_name}
+                              loading="lazy"
+                              decoding="async"
+                              width={48}
+                              height={48}
                               className="w-12 h-12 rounded-lg object-cover flex-shrink-0"
                             />
                           ) : (

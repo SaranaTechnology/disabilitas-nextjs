@@ -22,25 +22,28 @@ const categoryBadgeClass = (category: string) => {
   return map[category] || 'bg-primary/10 text-primary';
 };
 
-const ArticlesSection = () => {
-  const [articles, setArticles] = useState<ArticleSummary[]>([]);
-  const [loading, setLoading] = useState(true);
+interface ArticlesSectionProps {
+  initialArticles?: ArticleSummary[];
+}
+
+const ArticlesSection = ({ initialArticles }: ArticlesSectionProps = {}) => {
+  const [articles, setArticles] = useState<ArticleSummary[]>(initialArticles || []);
+  const [loading, setLoading] = useState(!initialArticles);
 
   useEffect(() => {
-    fetchArticles();
-  }, []);
-
-  const fetchArticles = async () => {
-    try {
-      const response = await apiClient.publicArticles.list({ limit: 6 });
-      if (response.error) throw new Error(response.error);
-      setArticles(response.data || []);
-    } catch (error) {
-      console.error('Error fetching articles:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
+    if (initialArticles) return;
+    (async () => {
+      try {
+        const response = await apiClient.publicArticles.list({ limit: 6 });
+        if (response.error) throw new Error(response.error);
+        setArticles(response.data || []);
+      } catch (error) {
+        console.error('Error fetching articles:', error);
+      } finally {
+        setLoading(false);
+      }
+    })();
+  }, [initialArticles]);
 
   const formatDate = (dateString?: string) => {
     if (!dateString) return '-';
@@ -48,6 +51,7 @@ const ArticlesSection = () => {
       day: 'numeric',
       month: 'short',
       year: 'numeric',
+      timeZone: 'Asia/Jakarta',
     });
   };
 
@@ -98,6 +102,8 @@ const ArticlesSection = () => {
                     <img
                       src={featured.cover_image}
                       alt={featured.title}
+                      loading="lazy"
+                      decoding="async"
                       className="w-full h-full object-cover"
                     />
                   ) : (
@@ -118,7 +124,7 @@ const ArticlesSection = () => {
                   <p className="text-gray-500 text-sm line-clamp-3 mb-4 flex-1">
                     {featured.excerpt}
                   </p>
-                  <div className="flex items-center gap-4 text-xs text-gray-400">
+                  <div className="flex items-center gap-4 text-xs text-gray-600">
                     <span className="flex items-center gap-1.5">
                       <User className="w-3.5 h-3.5" />
                       {featured.author_name || 'Admin'}
@@ -149,6 +155,8 @@ const ArticlesSection = () => {
                       <img
                         src={article.cover_image}
                         alt={article.title}
+                        loading="lazy"
+                        decoding="async"
                         className="w-full h-full object-cover"
                         style={{ minHeight: '100%' }}
                       />
@@ -167,7 +175,7 @@ const ArticlesSection = () => {
                     <h3 className="card-title text-sm sm:text-base line-clamp-2 mb-1.5">
                       {article.title}
                     </h3>
-                    <div className="flex items-center gap-3 text-[11px] text-gray-400">
+                    <div className="flex items-center gap-3 text-[11px] text-gray-600">
                       <span className="flex items-center gap-1">
                         <Calendar className="w-3 h-3" />
                         {formatDate(article.published_at || article.created_at)}

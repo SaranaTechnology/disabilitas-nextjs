@@ -1,10 +1,15 @@
 import type { Metadata } from 'next';
-import { SITE_URL } from '@/lib/api/seo';
+import { SITE_URL, getAllTrainingIds } from '@/lib/api/seo';
 import { BreadcrumbJsonLd } from '@/components/JsonLd';
 import TrainingDetailClient from './_components/TrainingDetailClient';
 
 interface Props {
   params: Promise<{ id: string }>;
+}
+
+export async function generateStaticParams() {
+  const trainings = await getAllTrainingIds();
+  return trainings.map((t) => ({ id: t.id }));
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {

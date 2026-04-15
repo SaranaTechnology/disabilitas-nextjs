@@ -192,6 +192,10 @@ export default function IsyaratPage() {
                             <img
                               src={entry.image_url}
                               alt={`Isyarat BISINDO: ${entry.label}`}
+                              loading="lazy"
+                              decoding="async"
+                              width={64}
+                              height={64}
                               className="w-16 h-16 rounded-lg object-cover shrink-0 bg-gray-100"
                             />
                           )}

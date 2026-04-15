@@ -40,6 +40,10 @@ interface Props {
   params: Promise<{ serviceId: string }>;
 }
 
+export function generateStaticParams() {
+  return Object.keys(serviceMetadata).map((serviceId) => ({ serviceId }));
+}
+
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { serviceId } = await params;
   const service = serviceMetadata[serviceId];

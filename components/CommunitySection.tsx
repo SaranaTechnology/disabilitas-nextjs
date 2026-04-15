@@ -8,34 +8,39 @@ import { MessageCircle, Users, Calendar, ArrowRight, Flame, Clock } from 'lucide
 import { apiClient } from '@/lib/api/client';
 import type { ForumThread, Event } from '@/lib/api/client';
 
-const CommunitySection = () => {
-  const [forumTopics, setForumTopics] = useState<ForumThread[]>([]);
-  const [upcomingEvents, setUpcomingEvents] = useState<Event[]>([]);
-  const [loading, setLoading] = useState(true);
+interface CommunitySectionProps {
+  initialThreads?: ForumThread[];
+  initialEvents?: Event[];
+}
+
+const CommunitySection = ({ initialThreads, initialEvents }: CommunitySectionProps = {}) => {
+  const hasInitial = initialThreads !== undefined && initialEvents !== undefined;
+  const [forumTopics, setForumTopics] = useState<ForumThread[]>(initialThreads || []);
+  const [upcomingEvents, setUpcomingEvents] = useState<Event[]>(initialEvents || []);
+  const [loading, setLoading] = useState(!hasInitial);
 
   useEffect(() => {
-    fetchData();
-  }, []);
+    if (hasInitial) return;
+    (async () => {
+      try {
+        const [forumRes, eventsRes] = await Promise.all([
+          apiClient.forum.listThreads(),
+          apiClient.events.list({ limit: 3 }),
+        ]);
 
-  const fetchData = async () => {
-    try {
-      const [forumRes, eventsRes] = await Promise.all([
-        apiClient.forum.listThreads(),
-        apiClient.events.list({ limit: 3 }),
-      ]);
-
-      if (forumRes.data && Array.isArray(forumRes.data)) {
-        setForumTopics(forumRes.data.slice(0, 4));
+        if (forumRes.data && Array.isArray(forumRes.data)) {
+          setForumTopics(forumRes.data.slice(0, 4));
+        }
+        if (eventsRes.data && Array.isArray(eventsRes.data)) {
+          setUpcomingEvents(eventsRes.data);
+        }
+      } catch (error) {
+        console.error('Error fetching community data:', error);
+      } finally {
+        setLoading(false);
       }
-      if (eventsRes.data && Array.isArray(eventsRes.data)) {
-        setUpcomingEvents(eventsRes.data);
-      }
-    } catch (error) {
-      console.error('Error fetching community data:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
+    })();
+  }, [hasInitial]);
 
   const formatEventDate = (dateString?: string) => {
     if (!dateString) return '-';
@@ -43,6 +48,7 @@ const CommunitySection = () => {
       day: 'numeric',
       month: 'short',
       year: 'numeric',
+      timeZone: 'Asia/Jakarta',
     });
   };
 
@@ -51,6 +57,7 @@ const CommunitySection = () => {
     return new Date(dateString).toLocaleTimeString('id-ID', {
       hour: '2-digit',
       minute: '2-digit',
+      timeZone: 'Asia/Jakarta',
     }) + ' WIB';
   };
 
@@ -138,7 +145,7 @@ const CommunitySection = () => {
               ) : forumTopics.length === 0 ? (
                 <div className="text-center py-10 rounded-xl bg-white border border-gray-100">
                   <MessageCircle className="mx-auto h-10 w-10 text-gray-300 mb-3" />
-                  <p className="text-gray-400 text-sm">Belum ada diskusi. Jadilah yang pertama!</p>
+                  <p className="text-gray-600 text-sm">Belum ada diskusi. Jadilah yang pertama!</p>
                 </div>
               ) : (
                 forumTopics.map((topic) => (
@@ -148,7 +155,7 @@ const CommunitySection = () => {
                         {topic.title}
                       </h4>
                       <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2 text-xs text-gray-400">
+                        <div className="flex items-center gap-2 text-xs text-gray-600">
                           {/* Avatar circle */}
                           <div className="w-5 h-5 rounded-full bg-gradient-to-br from-violet-400 to-pink-400 flex items-center justify-center text-[9px] text-white font-bold">
                             {(topic.user?.full_name || topic.user?.email || 'P').charAt(0).toUpperCase()}
@@ -156,11 +163,11 @@ const CommunitySection = () => {
                           <span>{topic.user?.full_name || topic.user?.email || 'Pengguna'}</span>
                           <span className="text-gray-300">·</span>
                           <Clock className="w-3 h-3" />
-                          <span>{getRelativeTime(topic.created_at)}</span>
+                          <span suppressHydrationWarning>{getRelativeTime(topic.created_at)}</span>
                         </div>
                         <div className="flex gap-1.5">
                           {parseTags(topic.tags).map((tag) => (
-                            <span key={tag} className="px-2 py-0.5 rounded-full bg-gray-100 text-[10px] text-gray-500 font-medium">
+                            <span key={tag} className="px-2 py-0.5 rounded-full bg-gray-100 text-[10px] text-gray-800 font-medium">
                               {tag}
                             </span>
                           ))}
@@ -204,7 +211,7 @@ const CommunitySection = () => {
               ) : upcomingEvents.length === 0 ? (
                 <div className="text-center py-10 rounded-xl bg-white border border-gray-100">
                   <Calendar className="mx-auto h-10 w-10 text-gray-300 mb-3" />
-                  <p className="text-gray-400 text-sm">Belum ada event mendatang.</p>
+                  <p className="text-gray-600 text-sm">Belum ada event mendatang.</p>
                 </div>
               ) : (
                 upcomingEvents.map((event) => (
@@ -218,7 +225,7 @@ const CommunitySection = () => {
                           {event.mode || 'Online'}
                         </span>
                       </div>
-                      <div className="flex items-center gap-4 text-xs text-gray-400">
+                      <div className="flex items-center gap-4 text-xs text-gray-600">
                         <span className="flex items-center gap-1.5">
                           <Calendar className="w-3 h-3" />
                           {formatEventDate(event.start_at)}

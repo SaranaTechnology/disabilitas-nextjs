@@ -308,6 +308,9 @@ export default function JobDetailClient() {
                   <img
                     src={job.company_logo}
                     alt={job.company_name}
+                    decoding="async"
+                    width={64}
+                    height={64}
                     className="w-16 h-16 rounded-xl object-cover flex-shrink-0"
                   />
                 ) : (

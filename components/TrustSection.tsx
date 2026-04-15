@@ -1,5 +1,3 @@
-'use client';
-
 import { Heart, Shield, Accessibility, Users } from 'lucide-react';
 
 const values = [

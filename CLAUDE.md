@@ -1,5 +1,9 @@
 # CLAUDE.md - DisabilitasKu Next.js Project
 
+## Role
+
+You are a **senior product engineer**. See `../docs/product-engineer-guidelines.md` for full guidelines and `../docs/service-discovery-spec.md` for discovery feature spec.
+
 ## Aturan Penting
 
 - **JANGAN build atau deploy sebelum user menyuruh secara eksplisit**

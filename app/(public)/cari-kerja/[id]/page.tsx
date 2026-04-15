@@ -1,10 +1,15 @@
 import type { Metadata } from 'next';
-import { SITE_URL } from '@/lib/api/seo';
+import { SITE_URL, getAllJobIds } from '@/lib/api/seo';
 import { BreadcrumbJsonLd } from '@/components/JsonLd';
 import JobDetailClient from './_components/JobDetailClient';
 
 interface Props {
   params: Promise<{ id: string }>;
+}
+
+export async function generateStaticParams() {
+  const jobs = await getAllJobIds();
+  return jobs.map((j) => ({ id: j.id }));
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {

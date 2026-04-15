@@ -5,6 +5,17 @@ const nextConfig: NextConfig = {
   typescript: {
     ignoreBuildErrors: false,
   },
+  images: {
+    remotePatterns: [
+      { protocol: 'https', hostname: 'api.disabilitasku.id' },
+      { protocol: 'https', hostname: '**.disabilitasku.id' },
+      { protocol: 'https', hostname: '**.amazonaws.com' },
+      { protocol: 'https', hostname: '**.cloudfront.net' },
+      { protocol: 'https', hostname: 'images.unsplash.com' },
+      { protocol: 'https', hostname: '**.googleusercontent.com' },
+    ],
+    formats: ['image/avif', 'image/webp'],
+  },
   async headers() {
     return [
       {

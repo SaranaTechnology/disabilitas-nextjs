@@ -121,9 +121,9 @@ const ContactSection = () => {
                     <IconComponent className="w-5 h-5" style={{ color: item.gradient.includes('emerald') ? '#059669' : '#4f46e5' }} />
                   </div>
                   <div>
-                    <h4 className="font-semibold text-gray-900 text-sm">{item.title}</h4>
+                    <h3 className="font-semibold text-gray-900 text-sm">{item.title}</h3>
                     <p className="text-primary font-medium text-sm">{item.value}</p>
-                    <p className="text-xs text-gray-400 mt-0.5">{item.subtitle}</p>
+                    <p className="text-xs text-gray-600 mt-0.5">{item.subtitle}</p>
                   </div>
                 </a>
               );
@@ -133,7 +133,7 @@ const ContactSection = () => {
             <div className="p-5 rounded-2xl bg-gradient-to-br from-amber-50 to-orange-50 border border-amber-100">
               <div className="flex items-center gap-2 mb-4">
                 <Clock className="w-4 h-4 text-amber-600" />
-                <h4 className="font-semibold text-gray-900 text-sm">Jam Operasional</h4>
+                <h3 className="font-semibold text-gray-900 text-sm">Jam Operasional</h3>
               </div>
               <div className="space-y-2 text-sm">
                 <div className="flex justify-between text-gray-600">
@@ -161,7 +161,7 @@ const ContactSection = () => {
                 </div>
                 <div>
                   <h3 className="text-lg font-bold text-gray-900">Kirim Pesan</h3>
-                  <p className="text-xs text-gray-400">Kami akan merespon dalam 1x24 jam</p>
+                  <p className="text-xs text-gray-600">Kami akan merespon dalam 1x24 jam</p>
                 </div>
               </div>
 
@@ -196,7 +196,7 @@ const ContactSection = () => {
                   <div>
                     <Label htmlFor="phone" className="text-gray-600 text-sm">Telepon</Label>
                     <div className="flex mt-1.5">
-                      <span className="inline-flex items-center px-3 rounded-l-xl border border-r-0 border-gray-200 bg-gray-50 text-gray-400 text-sm">
+                      <span className="inline-flex items-center px-3 rounded-l-xl border border-r-0 border-gray-200 bg-gray-50 text-gray-600 text-sm">
                         +62
                       </span>
                       <Input
@@ -215,7 +215,7 @@ const ContactSection = () => {
                       value={formData.category}
                       onValueChange={(value) => setFormData({ ...formData, category: value })}
                     >
-                      <SelectTrigger className="mt-1.5 rounded-xl border-gray-200">
+                      <SelectTrigger aria-label="Pilih kategori pesan" className="mt-1.5 rounded-xl border-gray-200">
                         <SelectValue placeholder="Pilih kategori" />
                       </SelectTrigger>
                       <SelectContent>

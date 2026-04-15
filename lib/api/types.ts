@@ -218,6 +218,10 @@ export const LOCATION_TYPES = [
 
 export type LocationType = typeof LOCATION_TYPES[number]['value'];
 
+export const LOCATION_TYPE_LABELS: Record<string, string> = Object.fromEntries(
+  LOCATION_TYPES.map((t) => [t.value, t.label]),
+);
+
 // Therapy Location Types
 export interface TherapyLocation {
   id: string;
