@@ -554,6 +554,82 @@ export interface CommunityListParams {
   per_page?: number;
 }
 
+// Schedule Types
+export interface ScheduleSlot {
+  id: string;
+  schedule_id: string;
+  day_of_week: number;
+  start_time: string;
+  end_time: string;
+  is_active: boolean;
+}
+
+export interface WeeklySchedule {
+  id: string;
+  therapist_id: string;
+  slot_duration_minutes: number;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface ScheduleDetail {
+  schedule: WeeklySchedule;
+  slots: ScheduleSlot[];
+  exceptions?: ScheduleException[];
+}
+
+export interface ScheduleException {
+  id: string;
+  therapist_id: string;
+  date: string;
+  is_available: boolean;
+  reason?: string;
+  start_time?: string;
+  end_time?: string;
+}
+
+export interface AvailableSlot {
+  date: string;
+  day_of_week: number;
+  start_time: string;
+  end_time: string;
+  is_booked: boolean;
+}
+
+// Therapy Provider (from search API)
+export interface TherapyProvider {
+  id: string;
+  email: string;
+  role: string;
+  full_name?: string;
+  city?: string;
+  district?: string;
+  bio?: string;
+  specialization?: string;
+  experience_years?: number;
+  certifications?: string;
+  languages?: string;
+  rate_per_session?: number;
+  consultation_methods?: string;
+  locations?: TherapyLocation[];
+}
+
+// Affiliation Types
+export interface LocationTherapistAffiliation {
+  id: string;
+  location_id: string;
+  therapist_id: string;
+  status: string;
+  invited_by: string;
+  role?: string;
+  therapist_name?: string;
+  therapist_email: string;
+  location_name: string;
+  created_at: string;
+  updated_at: string;
+}
+
 // Password Reset Types
 export interface PasswordResetRequest {
   email: string;
@@ -639,8 +715,12 @@ export interface JobSummary {
   salary_max?: number;
   salary_currency?: string;
   disability_types?: string;
+  experience_level?: string;
+  status: string;
   deadline_apply: string;
   view_count: number;
+  created_by?: string;
+  author_name?: string;
   created_at: string;
 }
 
@@ -708,9 +788,12 @@ export interface TrainingSummary {
   disability_types?: string;
   skill_level?: string;
   certificate: boolean;
+  status: string;
   view_count: number;
   registration_count?: number;
   max_participants?: number;
+  created_by: string;
+  author_name?: string;
   created_at: string;
 }
 
@@ -728,11 +811,24 @@ export interface TrainingDetail extends TrainingSummary {
 export interface TrainingRegistration {
   id: string;
   training_id: string;
+  user_id: string;
   training_title?: string;
   organizer_name?: string;
   motivation?: string;
   status: string;
   registered_at: string;
+  updated_at?: string;
+}
+
+export interface TrainingMaterial {
+  id: string;
+  training_id: string;
+  name: string;
+  s3_key: string;
+  content_type: string;
+  file_size: number;
+  uploaded_by: string;
+  created_at: string;
 }
 
 // Legacy Database type for compatibility

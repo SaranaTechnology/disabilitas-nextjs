@@ -16,6 +16,7 @@ const Footer = () => {
     platform: [
       { name: 'Tentang Kami', href: '/tentang' },
       { name: 'Cara Kerja', href: '/cara-kerja' },
+      { name: 'Kemitraan & CSR', href: '/kemitraan' },
       { name: 'Keamanan & Privasi', href: '/keamanan' },
       { name: 'Syarat & Ketentuan', href: '/syarat-ketentuan' }
     ],

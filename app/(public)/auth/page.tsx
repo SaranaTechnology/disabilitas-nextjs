@@ -1,14 +1,14 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { apiClient } from '@/lib/api/client';
 import { toast } from 'sonner';
+import { useAuth } from '@/hooks/useAuth';
 import AdminSetup from '@/components/AdminSetup';
 import { User, Users, Stethoscope, UserCheck } from 'lucide-react';
 import { validatePassword } from '@/lib/validation';
@@ -56,6 +56,19 @@ export default function AuthPage() {
   const [showAdminSetup, setShowAdminSetup] = useState(false);
   const [passwordErrors, setPasswordErrors] = useState<string[]>([]);
   const router = useRouter();
+  const { signIn, signUp: authSignUp, user: currentUser, loading: authLoading } = useAuth();
+
+  useEffect(() => {
+    if (!authLoading && currentUser) {
+      if (currentUser.role === 'admin') {
+        router.replace('/admin');
+      } else if (currentUser.role === 'therapy' || currentUser.role === 'therapist_independent' || currentUser.role === 'instructor' || currentUser.role === 'employer') {
+        router.replace('/dashboard');
+      } else {
+        router.replace('/beranda');
+      }
+    }
+  }, [currentUser, authLoading, router]);
 
   const selectedRole = ROLE_OPTIONS.find((r) => r.value === role);
 
@@ -65,13 +78,9 @@ export default function AuthPage() {
 
     try {
       if (isLogin) {
-        const response = await apiClient.auth.signInWithPassword({
-          email,
-          password,
-        });
+        const response = await signIn({ email, password });
 
         if (response.error) {
-          // Tampilkan pesan error dari server
           const errorMsg = response.error.toLowerCase();
           let title = "Login Gagal";
           let description = response.error;
@@ -87,24 +96,12 @@ export default function AuthPage() {
           toast.error(title, {
             description,
           });
-          return; // Stop execution here
+          return;
         }
 
-        // Login berhasil
         toast.success("Berhasil masuk!", {
           description: "Selamat datang kembali di DisabilitasKu.",
         });
-
-        const user = response.data?.user;
-        // Delay redirect sedikit agar toast terlihat
-        setTimeout(() => {
-          if (user?.role === 'admin') {
-            router.push('/admin');
-          } else {
-            router.push('/');
-          }
-          router.refresh();
-        }, 500);
       } else {
         // Validate password strength
         const pwResult = validatePassword(password);
@@ -125,23 +122,13 @@ export default function AuthPage() {
           ...(selectedRole?.requiresParent ? { parent_name: parentName } : {}),
         };
 
-        const response = await apiClient.auth.signUp(signUpData);
+        const response = await authSignUp(signUpData);
 
         if (response.error) throw new Error(response.error);
 
         toast.success("Registrasi berhasil!", {
           description: "Akun Anda berhasil dibuat. Selamat datang di DisabilitasKu!",
         });
-
-        // Auto login after registration
-        const user = response.data?.user;
-        if (user?.role === 'admin') {
-          router.push('/admin');
-        } else if (user?.role === 'therapy' || user?.role === 'therapist_independent') {
-          router.push('/profil');
-        } else {
-          router.push('/');
-        }
       }
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : 'Terjadi kesalahan tidak diketahui';
@@ -259,7 +246,7 @@ export default function AuthPage() {
               <Input
                 id="password"
                 type="password"
-                placeholder={isLogin ? 'Masukkan password' : 'Min. 8 karakter, huruf besar, angka, spesial'}
+                placeholder={isLogin ? 'Masukkan password' : 'Minimal 6 karakter'}
                 value={password}
                 onChange={(e) => {
                   setPassword(e.target.value);

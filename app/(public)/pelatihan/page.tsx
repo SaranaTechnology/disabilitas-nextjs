@@ -236,12 +236,6 @@ export default function PelatihanPage() {
               <GraduationCap className="h-8 w-8 text-primary mr-3" />
               <h1 className="text-2xl font-bold text-gray-900">Pelatihan Skill</h1>
             </div>
-            <Link href="/">
-              <Button variant="outline">
-                <ArrowLeft className="w-4 h-4 mr-2" />
-                Kembali ke Beranda
-              </Button>
-            </Link>
           </div>
         </div>
       </div>

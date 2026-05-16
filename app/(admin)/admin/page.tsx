@@ -7,7 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
-import { Users, MapPin, Calendar, UserCog, Shield, BookOpen, Mail, MessageSquare, FileText, Bell, Globe } from 'lucide-react';
+import { Users, MapPin, Calendar, UserCog, Shield, BookOpen, Mail, MessageSquare, FileText, Bell, Globe, Briefcase, Handshake, GraduationCap } from 'lucide-react';
 import { apiClient } from '@/lib/api/client';
 import LocationManager from '@/components/admin/LocationManager';
 import TherapistManager from '@/components/admin/TherapistManager';
@@ -19,7 +19,10 @@ import ArticleManager from '@/components/admin/ArticleManager';
 import NotificationManager from '@/components/admin/NotificationManager';
 import EventManager from '@/components/admin/EventManager';
 import ForumManager from '@/components/admin/ForumManager';
-import ComingSoon from '@/components/admin/ComingSoon';
+import JobManager from '@/components/admin/JobManager';
+import KemitraanManager from '@/components/admin/KemitraanManager';
+import MasterLokasiManager from '@/components/admin/MasterLokasiManager';
+import TrainingManager from '@/components/admin/TrainingManager';
 
 export default function AdminPage() {
   const { user, loading } = useAuth();
@@ -34,6 +37,8 @@ export default function AdminPage() {
     totalResources: 0,
     unreadContacts: 0,
     totalContacts: 0,
+    totalJobs: 0,
+    totalUsers: 0,
   });
 
   // Contact stats for chart
@@ -72,17 +77,14 @@ export default function AdminPage() {
 
   const fetchStats = async () => {
     try {
-      // Fetch locations count
-      const locResponse = await apiClient.adminTherapyLocations.list({ limit: 1 });
-
-      // Fetch resources count
-      const resResponse = await apiClient.adminResources.list({ limit: 1 });
-
-      // Fetch unread contacts count
-      const unreadResponse = await apiClient.adminContacts.getUnreadCount();
-
-      // Fetch all contacts for stats
-      const allContactsResponse = await apiClient.adminContacts.list({ limit: 1000 });
+      const [locResponse, resResponse, unreadResponse, allContactsResponse, jobsResponse, usersResponse] = await Promise.all([
+        apiClient.adminTherapyLocations.list({ limit: 1 }),
+        apiClient.adminResources.list({ limit: 1 }),
+        apiClient.adminContacts.getUnreadCount(),
+        apiClient.adminContacts.list({ limit: 1000 }),
+        apiClient.adminJobs.list({ limit: 1 }),
+        apiClient.adminUsers.list({ page: 1, page_size: 1 }),
+      ]);
 
       const contacts = allContactsResponse.data || [];
       const unread = contacts.filter((c: any) => c.status === 'unread').length;
@@ -94,6 +96,8 @@ export default function AdminPage() {
         totalResources: (resResponse as any).meta?.total || (Array.isArray(resResponse.data) ? resResponse.data.length : 0),
         unreadContacts: unreadResponse.data?.unread_count || unread,
         totalContacts: contacts.length,
+        totalJobs: (jobsResponse as any).meta?.total || (Array.isArray(jobsResponse.data) ? jobsResponse.data.length : 0),
+        totalUsers: (usersResponse as any).meta?.total || (Array.isArray(usersResponse.data) ? usersResponse.data.length : 0),
       });
 
       setContactStats({ unread, read, replied });
@@ -137,7 +141,29 @@ export default function AdminPage() {
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-8">
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Pengguna</CardTitle>
+              <Users className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-primary">{stats.totalUsers}</div>
+              <p className="text-xs text-muted-foreground">terdaftar</p>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Lowongan Kerja</CardTitle>
+              <Briefcase className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-primary">{stats.totalJobs}</div>
+              <p className="text-xs text-muted-foreground">lowongan</p>
+            </CardContent>
+          </Card>
+
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Lokasi Terapi</CardTitle>
@@ -145,7 +171,7 @@ export default function AdminPage() {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold text-primary">{stats.totalLocations}</div>
-              <p className="text-xs text-muted-foreground">lokasi terdaftar</p>
+              <p className="text-xs text-muted-foreground">lokasi</p>
             </CardContent>
           </Card>
 
@@ -156,7 +182,7 @@ export default function AdminPage() {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold text-primary">{stats.totalResources}</div>
-              <p className="text-xs text-muted-foreground">materi tersedia</p>
+              <p className="text-xs text-muted-foreground">materi</p>
             </CardContent>
           </Card>
 
@@ -167,7 +193,7 @@ export default function AdminPage() {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold text-primary">{stats.totalContacts}</div>
-              <p className="text-xs text-muted-foreground">total pesan kontak</p>
+              <p className="text-xs text-muted-foreground">total pesan</p>
             </CardContent>
           </Card>
 
@@ -180,7 +206,7 @@ export default function AdminPage() {
               <div className={`text-2xl font-bold ${stats.unreadContacts > 0 ? 'text-red-600' : 'text-primary'}`}>
                 {stats.unreadContacts}
               </div>
-              <p className="text-xs text-muted-foreground">perlu ditindaklanjuti</p>
+              <p className="text-xs text-muted-foreground">tindaklanjuti</p>
             </CardContent>
           </Card>
         </div>
@@ -315,7 +341,10 @@ export default function AdminPage() {
             <TabsTrigger value="locations">Lokasi</TabsTrigger>
             <TabsTrigger value="therapists">Terapis</TabsTrigger>
             <TabsTrigger value="users">Pengguna</TabsTrigger>
+            <TabsTrigger value="jobs">Loker</TabsTrigger>
+            <TabsTrigger value="trainings">Pelatihan</TabsTrigger>
             <TabsTrigger value="appointments">Janji Temu</TabsTrigger>
+            <TabsTrigger value="kemitraan">Kemitraan</TabsTrigger>
             <TabsTrigger value="articles">Artikel</TabsTrigger>
             <TabsTrigger value="forum">Forum</TabsTrigger>
             <TabsTrigger value="master-lokasi">Master Lokasi</TabsTrigger>
@@ -345,8 +374,20 @@ export default function AdminPage() {
             <UserManager />
           </TabsContent>
 
+          <TabsContent value="jobs">
+            <JobManager />
+          </TabsContent>
+
           <TabsContent value="appointments">
             <AppointmentManager />
+          </TabsContent>
+
+          <TabsContent value="trainings">
+            <TrainingManager />
+          </TabsContent>
+
+          <TabsContent value="kemitraan">
+            <KemitraanManager />
           </TabsContent>
 
           <TabsContent value="articles">
@@ -358,18 +399,7 @@ export default function AdminPage() {
           </TabsContent>
 
           <TabsContent value="master-lokasi">
-            <ComingSoon
-              title="Master Data Lokasi"
-              description="Kelola data negara, provinsi, dan kota"
-              icon={<Globe className="h-5 w-5" />}
-              features={[
-                'CRUD data negara',
-                'CRUD data provinsi/state',
-                'CRUD data kota',
-                'Import/export data lokasi',
-                'Mapping alias lokasi',
-              ]}
-            />
+            <MasterLokasiManager />
           </TabsContent>
         </Tabs>
       </div>

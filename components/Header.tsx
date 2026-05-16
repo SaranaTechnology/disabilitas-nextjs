@@ -21,10 +21,9 @@ const Header = () => {
 
   const navigation = [
     { name: 'Beranda', href: '/', isRoute: true },
-    { name: 'Layanan', href: '/layanan', isRoute: true },
-    { name: 'Cari Kerja', href: '/cari-kerja', isRoute: true },
+    { name: 'Terapis', href: '/terapis', isRoute: true },
     { name: 'Pelatihan', href: '/pelatihan', isRoute: true },
-    { name: 'Acara', href: '/acara', isRoute: true },
+    { name: 'Cari Kerja', href: '/cari-kerja', isRoute: true },
     { name: 'Komunitas', href: '/komunitas', isRoute: true },
     { name: 'Artikel', href: '/artikel', isRoute: true },
   ];

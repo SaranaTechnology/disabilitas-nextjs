@@ -224,14 +224,19 @@ async function seoFetchMeta(endpoint: string): Promise<{ total: number }> {
 }
 
 export async function getHomepageStats() {
-  const [therapists, articles, threads] = await Promise.all([
-    seoFetchMeta('/public/therapists?page_size=1'),
-    seoFetchMeta('/public/articles?limit=1'),
-    seoFetchMeta('/public/forum/threads'),
-  ]);
-  return {
-    therapy: therapists.total,
-    articles: articles.total,
-    forum: threads.total,
-  };
+  try {
+    const res = await fetch(`${BASE_URL}/public/stats`, { next: { revalidate: 3600 } });
+    if (res.ok) {
+      const json = await res.json();
+      const d = json.data ?? {};
+      return {
+        users: d.users ?? 0,
+        therapy: d.locations ?? 0,
+        articles: d.articles ?? 0,
+        forum: d.threads ?? 0,
+        communities: d.communities ?? 0,
+      };
+    }
+  } catch {}
+  return { users: 0, therapy: 0, articles: 0, forum: 0, communities: 0 };
 }

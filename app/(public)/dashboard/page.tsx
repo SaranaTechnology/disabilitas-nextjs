@@ -19,6 +19,10 @@ import {
   CalendarPlus,
   MapPin,
   TrendingUp,
+  GraduationCap,
+  Briefcase,
+  Settings,
+  Stethoscope,
 } from 'lucide-react';
 import { apiClient } from '@/lib/api/client';
 import type { Appointment } from '@/lib/api/types';
@@ -181,19 +185,77 @@ export default function DashboardPage() {
           {/* Header */}
           <div className="flex items-center justify-between mb-8">
             <div>
-              <h1 className="text-2xl md:text-3xl font-bold text-gray-900">Dashboard Terapis</h1>
-              <p className="text-gray-600 mt-1">Kelola jadwal dan klien Anda</p>
+              <h1 className="text-2xl md:text-3xl font-bold text-gray-900">
+                {user?.role === 'therapist_independent' ? 'Dashboard Terapis' : 'Dashboard'}
+              </h1>
+              <p className="text-gray-600 mt-1">Kelola layanan dan klien Anda</p>
             </div>
-            <div className="flex gap-3">
-              <Button variant="outline" onClick={() => router.push('/acara')}>
-                <CalendarPlus className="w-4 h-4 mr-2" />
-                Buat Acara
+            <Button variant="outline" onClick={() => router.push('/profil')}>
+              <Settings className="w-4 h-4 mr-2" />
+              Edit Profil
+            </Button>
+          </div>
+
+          {/* Quick Actions */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-8">
+            <Button
+              variant="outline"
+              className="h-auto py-4 flex flex-col items-center gap-2 border-gray-200 hover:border-primary hover:bg-primary/5"
+              onClick={() => router.push('/profil')}
+            >
+              <Stethoscope className="w-5 h-5 text-primary" />
+              <span className="text-xs font-medium">Profil Terapis</span>
+            </Button>
+            <Button
+              variant="outline"
+              className="h-auto py-4 flex flex-col items-center gap-2 border-gray-200 hover:border-primary hover:bg-primary/5"
+              onClick={() => router.push('/jadwal')}
+            >
+              <Calendar className="w-5 h-5 text-primary" />
+              <span className="text-xs font-medium">Atur Jadwal</span>
+            </Button>
+            {user?.role === 'therapy' && (
+              <Button
+                variant="outline"
+                className="h-auto py-4 flex flex-col items-center gap-2 border-gray-200 hover:border-primary hover:bg-primary/5"
+                onClick={() => router.push('/daftar-lokasi')}
+              >
+                <MapPin className="w-5 h-5 text-primary" />
+                <span className="text-xs font-medium">Lokasi Praktek</span>
               </Button>
-              <Button onClick={() => router.push('/daftar-lokasi')}>
-                <MapPin className="w-4 h-4 mr-2" />
-                Tambah Lokasi
-              </Button>
-            </div>
+            )}
+            <Button
+              variant="outline"
+              className="h-auto py-4 flex flex-col items-center gap-2 border-gray-200 hover:border-primary hover:bg-primary/5"
+              onClick={() => router.push('/acara')}
+            >
+              <CalendarPlus className="w-5 h-5 text-primary" />
+              <span className="text-xs font-medium">Buat Acara</span>
+            </Button>
+            <Button
+              variant="outline"
+              className="h-auto py-4 flex flex-col items-center gap-2 border-gray-200 hover:border-green-600 hover:bg-green-50"
+              onClick={() => router.push('/pelatihan')}
+            >
+              <GraduationCap className="w-5 h-5 text-green-600" />
+              <span className="text-xs font-medium">Buat Pelatihan</span>
+            </Button>
+            <Button
+              variant="outline"
+              className="h-auto py-4 flex flex-col items-center gap-2 border-gray-200 hover:border-blue-600 hover:bg-blue-50"
+              onClick={() => router.push('/komunitas')}
+            >
+              <Users className="w-5 h-5 text-blue-600" />
+              <span className="text-xs font-medium">Komunitas</span>
+            </Button>
+            <Button
+              variant="outline"
+              className="h-auto py-4 flex flex-col items-center gap-2 border-gray-200 hover:border-violet-600 hover:bg-violet-50"
+              onClick={() => router.push('/forum')}
+            >
+              <Users className="w-5 h-5 text-violet-600" />
+              <span className="text-xs font-medium">Forum</span>
+            </Button>
           </div>
 
           {/* Stats */}

@@ -13,7 +13,8 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { User as UserIcon, Mail, Phone, MapPin, Calendar, Save, Shield, Bell, History } from 'lucide-react';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { User as UserIcon, Mail, Phone, MapPin, Calendar, Save, Shield, Bell, History, Briefcase, Clock, DollarSign, Award, MessageCircle } from 'lucide-react';
 
 export default function ProfilePage() {
   const { user, loading: authLoading } = useAuth();
@@ -43,14 +44,27 @@ export default function ProfilePage() {
         throw new Error(response.error);
       }
       setProfile(response.data);
+      const d = response.data as any;
       setFormData({
-        full_name: response.data?.full_name || response.data?.name,
-        phone: response.data?.phone,
-        address: response.data?.address,
-        city: response.data?.city,
-        date_of_birth: response.data?.date_of_birth,
-        gender: response.data?.gender,
-      });
+        full_name: d?.full_name || d?.name,
+        phone: d?.phone,
+        address: d?.address,
+        city: d?.city,
+        date_of_birth: d?.date_of_birth,
+        gender: d?.gender,
+        bio: d?.Profile?.Bio || d?.Profile?.bio || d?.bio,
+        specialization: d?.Profile?.Specialization || d?.Profile?.specialization || d?.specialization,
+        experience_years: d?.Profile?.ExperienceYears || d?.Profile?.experience_years || d?.experience_years,
+        certifications: d?.Profile?.Certifications || d?.Profile?.certifications || d?.certifications,
+        languages: d?.Profile?.Languages || d?.Profile?.languages || d?.languages,
+        rate_per_session: d?.Profile?.RatePerSession || d?.Profile?.rate_per_session || d?.rate_per_session,
+        consultation_methods: d?.Profile?.ConsultationMethods || d?.Profile?.consultation_methods || d?.consultation_methods,
+        company_name: d?.Profile?.CompanyName || d?.Profile?.company_name || d?.company_name,
+        industry: d?.Profile?.Industry || d?.Profile?.industry || d?.industry,
+        company_description: d?.Profile?.CompanyDescription || d?.Profile?.company_description || d?.company_description,
+        company_website: d?.Profile?.CompanyWebsite || d?.Profile?.company_website || d?.company_website,
+        employee_count: d?.Profile?.EmployeeCount || d?.Profile?.employee_count || d?.employee_count,
+      } as any);
     } catch (error) {
       console.error('Error fetching profile:', error);
       // Use data from auth context as fallback
@@ -96,11 +110,19 @@ export default function ProfilePage() {
     }
   };
 
+  const isTherapistRole = profile?.role === 'therapist_independent' || profile?.role === 'therapy';
+  const isEmployerRole = profile?.role === 'employer';
+  const isInstructorRole = profile?.role === 'instructor';
+
   const getRoleLabel = (role?: string) => {
     switch (role) {
       case 'admin': return 'Administrator';
-      case 'therapy': return 'Terapis';
-      case 'user_disabilitas': return 'Pengguna';
+      case 'therapy': return 'Pemilik Yayasan/Klinik';
+      case 'therapist_independent': return 'Terapis Independen';
+      case 'instructor': return 'Pengajar Profesional';
+      case 'employer': return 'Mitra Perusahaan';
+      case 'orang_tua': return 'Orang Tua';
+      case 'user_disabilitas': return 'Penyandang Disabilitas';
       default: return role || 'Pengguna';
     }
   };
@@ -272,6 +294,183 @@ export default function ProfilePage() {
                       rows={3}
                     />
                   </div>
+
+                  {/* Therapist / Instructor fields */}
+                  {(isTherapistRole || isInstructorRole) && (
+                    <>
+                      <div className="border-t pt-6">
+                        <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                          <Briefcase className="h-5 w-5 text-primary" />
+                          {isTherapistRole ? 'Profil Terapis' : 'Profil Pengajar'}
+                        </h3>
+                      </div>
+
+                      <div className="grid gap-6 md:grid-cols-2">
+                        <div className="space-y-2">
+                          <Label htmlFor="specialization">Spesialisasi</Label>
+                          <div className="relative">
+                            <Briefcase className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                            <Input
+                              id="specialization"
+                              placeholder={isTherapistRole ? 'Misal: Fisioterapi, Terapi Wicara' : 'Misal: Bahasa Isyarat, Teknologi Asistif'}
+                              value={(formData as any).specialization || ''}
+                              onChange={(e) => setFormData({ ...formData, specialization: e.target.value } as any)}
+                              className="pl-10"
+                            />
+                          </div>
+                        </div>
+
+                        <div className="space-y-2">
+                          <Label htmlFor="experience_years">Pengalaman (tahun)</Label>
+                          <div className="relative">
+                            <Clock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                            <Input
+                              id="experience_years"
+                              type="number"
+                              min="0"
+                              placeholder="0"
+                              value={(formData as any).experience_years || ''}
+                              onChange={(e) => setFormData({ ...formData, experience_years: parseInt(e.target.value) || 0 } as any)}
+                              className="pl-10"
+                            />
+                          </div>
+                        </div>
+
+                        <div className="space-y-2">
+                          <Label htmlFor="rate_per_session">Tarif per Sesi (Rp)</Label>
+                          <div className="relative">
+                            <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                            <Input
+                              id="rate_per_session"
+                              type="number"
+                              min="0"
+                              placeholder="0"
+                              value={(formData as any).rate_per_session || ''}
+                              onChange={(e) => setFormData({ ...formData, rate_per_session: parseInt(e.target.value) || 0 } as any)}
+                              className="pl-10"
+                            />
+                          </div>
+                        </div>
+
+                        <div className="space-y-2">
+                          <Label htmlFor="languages">Bahasa yang Dikuasai</Label>
+                          <Input
+                            id="languages"
+                            placeholder="Misal: Indonesia, Inggris"
+                            value={(formData as any).languages || ''}
+                            onChange={(e) => setFormData({ ...formData, languages: e.target.value } as any)}
+                          />
+                        </div>
+                      </div>
+
+                      {isTherapistRole && (
+                        <div className="space-y-2">
+                          <Label htmlFor="consultation_methods">Metode Konsultasi</Label>
+                          <div className="relative">
+                            <MessageCircle className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                            <Input
+                              id="consultation_methods"
+                              placeholder="Misal: Tatap Muka, Online, Chat, Home Visit"
+                              value={(formData as any).consultation_methods || ''}
+                              onChange={(e) => setFormData({ ...formData, consultation_methods: e.target.value } as any)}
+                              className="pl-10"
+                            />
+                          </div>
+                          <p className="text-xs text-gray-500">Pisahkan dengan koma</p>
+                        </div>
+                      )}
+
+                      <div className="space-y-2">
+                        <Label htmlFor="certifications">Sertifikasi & Pendidikan</Label>
+                        <div className="relative">
+                          <Award className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                          <Textarea
+                            id="certifications"
+                            placeholder="Misal: S1 Fisioterapi Universitas Indonesia, STR Fisioterapi No. xxx"
+                            value={(formData as any).certifications || ''}
+                            onChange={(e) => setFormData({ ...formData, certifications: e.target.value } as any)}
+                            rows={3}
+                            className="pl-10"
+                          />
+                        </div>
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label htmlFor="bio">Bio / Tentang Diri</Label>
+                        <Textarea
+                          id="bio"
+                          placeholder="Ceritakan tentang diri Anda, pengalaman, dan pendekatan terapi yang Anda gunakan..."
+                          value={(formData as any).bio || ''}
+                          onChange={(e) => setFormData({ ...formData, bio: e.target.value } as any)}
+                          rows={4}
+                        />
+                      </div>
+                    </>
+                  )}
+
+                  {/* Employer fields */}
+                  {isEmployerRole && (
+                    <>
+                      <div className="border-t pt-6">
+                        <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                          <Briefcase className="h-5 w-5 text-primary" />
+                          Profil Perusahaan
+                        </h3>
+                      </div>
+
+                      <div className="grid gap-6 md:grid-cols-2">
+                        <div className="space-y-2">
+                          <Label htmlFor="company_name">Nama Perusahaan</Label>
+                          <Input
+                            id="company_name"
+                            placeholder="Nama perusahaan"
+                            value={(formData as any).company_name || ''}
+                            onChange={(e) => setFormData({ ...formData, company_name: e.target.value } as any)}
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <Label htmlFor="industry">Industri</Label>
+                          <Input
+                            id="industry"
+                            placeholder="Misal: Teknologi, Manufaktur"
+                            value={(formData as any).industry || ''}
+                            onChange={(e) => setFormData({ ...formData, industry: e.target.value } as any)}
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <Label htmlFor="company_website">Website</Label>
+                          <Input
+                            id="company_website"
+                            placeholder="https://..."
+                            value={(formData as any).company_website || ''}
+                            onChange={(e) => setFormData({ ...formData, company_website: e.target.value } as any)}
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <Label htmlFor="employee_count">Jumlah Karyawan</Label>
+                          <Input
+                            id="employee_count"
+                            type="number"
+                            min="0"
+                            placeholder="0"
+                            value={(formData as any).employee_count || ''}
+                            onChange={(e) => setFormData({ ...formData, employee_count: parseInt(e.target.value) || 0 } as any)}
+                          />
+                        </div>
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label htmlFor="company_description">Deskripsi Perusahaan</Label>
+                        <Textarea
+                          id="company_description"
+                          placeholder="Tentang perusahaan Anda dan komitmen inklusif..."
+                          value={(formData as any).company_description || ''}
+                          onChange={(e) => setFormData({ ...formData, company_description: e.target.value } as any)}
+                          rows={4}
+                        />
+                      </div>
+                    </>
+                  )}
                 </CardContent>
                 <CardFooter>
                   <Button onClick={handleSave} disabled={saving}>

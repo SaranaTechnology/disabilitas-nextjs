@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
-import { ArrowRight, Search, MapPin, Heart, Shield, Sparkles } from 'lucide-react';
+import { ArrowRight, Search, MapPin, Heart, Shield, Sparkles, Users } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { apiClient } from '@/lib/api/client';
 
@@ -39,9 +39,11 @@ function useAnimatedCount(target: number, duration = 1500) {
 }
 
 interface HeroStats {
+  users: number;
   therapy: number;
   articles: number;
   forum: number;
+  communities: number;
 }
 
 interface HeroSectionProps {
@@ -50,22 +52,24 @@ interface HeroSectionProps {
 
 const HeroSection = ({ initialStats }: HeroSectionProps = {}) => {
   const router = useRouter();
-  const [stats, setStats] = useState<HeroStats>(initialStats || { therapy: 0, articles: 0, forum: 0 });
+  const [stats, setStats] = useState<HeroStats>(initialStats || { users: 0, therapy: 0, articles: 0, forum: 0, communities: 0 });
 
   useEffect(() => {
     if (initialStats) return;
     const fetchStats = async () => {
       try {
-        const [therapistsRes, articlesRes, forumRes] = await Promise.all([
-          apiClient.public.therapists.list({ page_size: 1 }),
-          apiClient.public.articles.list({ limit: 1 }),
-          apiClient.forum.listThreads(),
-        ]);
-        setStats({
-          therapy: therapistsRes.meta?.total ?? 0,
-          articles: articlesRes.meta?.total ?? 0,
-          forum: forumRes.meta?.total ?? (Array.isArray(forumRes.data) ? forumRes.data.length : 0),
-        });
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL || '/api'}/public/stats`);
+        if (res.ok) {
+          const json = await res.json();
+          const d = json.data ?? {};
+          setStats({
+            users: d.users ?? 0,
+            therapy: d.locations ?? 0,
+            articles: d.articles ?? 0,
+            forum: d.threads ?? 0,
+            communities: d.communities ?? 0,
+          });
+        }
       } catch (error) {
         console.error('Error fetching stats:', error);
       }
@@ -73,6 +77,7 @@ const HeroSection = ({ initialStats }: HeroSectionProps = {}) => {
     fetchStats();
   }, [initialStats]);
 
+  const usersCounter = useAnimatedCount(stats.users);
   const therapyCounter = useAnimatedCount(stats.therapy);
   const articlesCounter = useAnimatedCount(stats.articles);
   const forumCounter = useAnimatedCount(stats.forum);
@@ -159,12 +164,13 @@ const HeroSection = ({ initialStats }: HeroSectionProps = {}) => {
         </div>
 
         {/* Stats — animated counters */}
-        <div className="max-w-3xl mx-auto">
-          <div className="grid grid-cols-3 gap-4">
+        <div className="max-w-4xl mx-auto">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
             {[
-              { counter: therapyCounter, label: 'Lokasi Terapi', icon: Heart, color: 'from-pink-500 to-rose-500', bgColor: 'bg-pink-50' },
-              { counter: articlesCounter, label: 'Artikel Edukasi', icon: Sparkles, color: 'from-amber-500 to-orange-500', bgColor: 'bg-amber-50' },
-              { counter: forumCounter, label: 'Diskusi Aktif', icon: Shield, color: 'from-primary to-purple-600', bgColor: 'bg-purple-50' },
+              { counter: usersCounter, label: 'Pengguna Terdaftar', icon: Users, color: 'from-blue-500 to-indigo-500', bgColor: 'bg-blue-50', iconColor: '#3b82f6' },
+              { counter: therapyCounter, label: 'Lokasi Terapi', icon: Heart, color: 'from-pink-500 to-rose-500', bgColor: 'bg-pink-50', iconColor: '#ec4899' },
+              { counter: articlesCounter, label: 'Artikel Edukasi', icon: Sparkles, color: 'from-amber-500 to-orange-500', bgColor: 'bg-amber-50', iconColor: '#f59e0b' },
+              { counter: forumCounter, label: 'Diskusi Aktif', icon: Shield, color: 'from-primary to-purple-600', bgColor: 'bg-purple-50', iconColor: '#7c3aed' },
             ].map((item) => {
               const IconComponent = item.icon;
               return (
@@ -174,7 +180,7 @@ const HeroSection = ({ initialStats }: HeroSectionProps = {}) => {
                   className="text-center p-5 rounded-2xl bg-white/70 backdrop-blur border border-white shadow-sm hover:shadow-md transition-shadow"
                 >
                   <div className={`w-10 h-10 rounded-xl ${item.bgColor} flex items-center justify-center mx-auto mb-3`}>
-                    <IconComponent className={`w-5 h-5 bg-gradient-to-r ${item.color} bg-clip-text`} style={{ color: item.color.includes('pink') ? '#ec4899' : item.color.includes('amber') ? '#f59e0b' : '#7c3aed' }} />
+                    <IconComponent className="w-5 h-5" style={{ color: item.iconColor }} />
                   </div>
                   <div className="text-3xl md:text-4xl font-bold text-gray-900 mb-1">
                     {item.counter.count > 0 ? `${item.counter.count}+` : '-'}

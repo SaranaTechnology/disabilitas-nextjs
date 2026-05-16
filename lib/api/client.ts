@@ -57,7 +57,12 @@ import type {
   JobApplication,
   TrainingSummary,
   TrainingDetail,
-  TrainingRegistration
+  TrainingRegistration,
+  TrainingMaterial,
+  ScheduleDetail,
+  AvailableSlot,
+  TherapyProvider,
+  LocationTherapistAffiliation
 } from './types';
 
 /** Shape returned by the /me endpoint (PascalCase or snake_case from Go backend) */
@@ -609,6 +614,55 @@ class ApiClient {
     }
   };
 
+  // Admin location management (countries, states, cities)
+  adminLocations = {
+    createCountry: async (data: { code: string; name: string }) => {
+      return await this.makeRequest<{ code: string; name: string }>('/admin/locations/countries', {
+        method: 'POST',
+        body: JSON.stringify(data),
+      });
+    },
+    updateCountry: async (code: string, name: string) => {
+      return await this.makeRequest<{ code: string; name: string }>(`/admin/locations/countries/${code}`, {
+        method: 'PATCH',
+        body: JSON.stringify({ name }),
+      });
+    },
+    deleteCountry: async (code: string) => {
+      return await this.makeRequest<void>(`/admin/locations/countries/${code}`, { method: 'DELETE' });
+    },
+    createState: async (data: { code: string; country_code: string; name: string }) => {
+      return await this.makeRequest<{ code: string; country_code: string; name: string }>('/admin/locations/states', {
+        method: 'POST',
+        body: JSON.stringify(data),
+      });
+    },
+    updateState: async (code: string, data: { country_code?: string; name?: string }) => {
+      return await this.makeRequest<any>(`/admin/locations/states/${code}`, {
+        method: 'PATCH',
+        body: JSON.stringify(data),
+      });
+    },
+    deleteState: async (code: string) => {
+      return await this.makeRequest<void>(`/admin/locations/states/${code}`, { method: 'DELETE' });
+    },
+    createCity: async (data: { code: string; state_code: string; name: string; type: string; aliases?: string[] }) => {
+      return await this.makeRequest<any>('/admin/locations/cities', {
+        method: 'POST',
+        body: JSON.stringify(data),
+      });
+    },
+    updateCity: async (code: string, data: { state_code?: string; name?: string; type?: string; aliases?: string[] }) => {
+      return await this.makeRequest<any>(`/admin/locations/cities/${code}`, {
+        method: 'PATCH',
+        body: JSON.stringify(data),
+      });
+    },
+    deleteCity: async (code: string) => {
+      return await this.makeRequest<void>(`/admin/locations/cities/${code}`, { method: 'DELETE' });
+    },
+  };
+
   // Admin therapy locations
   adminTherapyLocations = {
     list: async (params: { limit?: number } = {}) => {
@@ -796,7 +850,11 @@ class ApiClient {
       if (params.page) qs.set('page', String(params.page));
       if (params.page_size) qs.set('page_size', String(params.page_size));
       const suffix = qs.toString() ? `?${qs.toString()}` : '';
-      return await this.makeRequest<User[]>(`/admin/users${suffix}`);
+      const response = await this.makeRequest<RawUser[]>(`/admin/users${suffix}`);
+      if (response.data && Array.isArray(response.data)) {
+        return { ...response, data: response.data.map(u => this.transformUser(u)) };
+      }
+      return response as ApiResponse<User[]>;
     },
     create: async (data: { email: string; password: string; role?: string; full_name?: string }) => {
       return await this.makeRequest<User>('/admin/users', {
@@ -815,6 +873,44 @@ class ApiClient {
         method: 'DELETE',
       });
     }
+  };
+
+  // Admin jobs methods
+  adminJobs = {
+    list: async (params: { q?: string; status?: string; work_type?: string; employment_type?: string; limit?: number; offset?: number } = {}) => {
+      const qs = new URLSearchParams();
+      if (params.q) qs.set('q', params.q);
+      if (params.status) qs.set('status', params.status);
+      if (params.work_type) qs.set('work_type', params.work_type);
+      if (params.employment_type) qs.set('employment_type', params.employment_type);
+      if (params.limit) qs.set('limit', String(params.limit));
+      if (params.offset) qs.set('offset', String(params.offset));
+      const suffix = qs.toString() ? `?${qs.toString()}` : '';
+      return await this.makeRequest<JobSummary[]>(`/admin/jobs/${suffix}`);
+    },
+    get: async (id: string) => {
+      return await this.makeRequest<JobDetail>(`/admin/jobs/${id}`);
+    },
+    delete: async (id: string) => {
+      return await this.makeRequest<void>(`/admin/jobs/${id}`, {
+        method: 'DELETE',
+      });
+    },
+    applications: async (jobId: string) => {
+      return await this.makeRequest<JobApplication[]>(`/admin/jobs/${jobId}/applications`);
+    },
+    create: async (data: Record<string, unknown>) => {
+      return await this.makeRequest<JobDetail>('/jobs', {
+        method: 'POST',
+        body: JSON.stringify(data),
+      });
+    },
+    update: async (id: string, data: Record<string, unknown>) => {
+      return await this.makeRequest<JobDetail>(`/jobs/${id}`, {
+        method: 'PATCH',
+        body: JSON.stringify(data),
+      });
+    },
   };
 
   // User methods
@@ -894,6 +990,84 @@ class ApiClient {
     getTherapistAppointments: async (therapistId: string) => {
       return await this.makeRequest<Appointment[]>(`/therapists/${therapistId}/appointments`);
     }
+  };
+
+  // Schedule methods (therapist)
+  schedule = {
+    get: async () => {
+      return await this.makeRequest<ScheduleDetail>('/schedule');
+    },
+    create: async (data: { slot_duration_minutes?: number; slots: Array<{ day_of_week: number; start_time: string; end_time: string }> }) => {
+      return await this.makeRequest<ScheduleDetail>('/schedule', {
+        method: 'POST',
+        body: JSON.stringify(data),
+      });
+    },
+    update: async (data: { slot_duration_minutes?: number; slots: Array<{ day_of_week: number; start_time: string; end_time: string }> }) => {
+      return await this.makeRequest<ScheduleDetail>('/schedule', {
+        method: 'PUT',
+        body: JSON.stringify(data),
+      });
+    },
+    delete: async () => {
+      return await this.makeRequest<void>('/schedule', { method: 'DELETE' });
+    },
+    addException: async (data: { date: string; is_available?: boolean; reason?: string; start_time?: string; end_time?: string }) => {
+      return await this.makeRequest<unknown>('/schedule/exceptions', {
+        method: 'POST',
+        body: JSON.stringify(data),
+      });
+    },
+    deleteException: async (id: string) => {
+      return await this.makeRequest<void>(`/schedule/exceptions/${id}`, { method: 'DELETE' });
+    },
+    getTherapistSchedule: async (therapistId: string) => {
+      return await this.makeRequest<ScheduleDetail>(`/therapists/${therapistId}/schedule`);
+    },
+    getAvailableSlots: async (therapistId: string, from: string, to: string) => {
+      return await this.makeRequest<AvailableSlot[]>(`/therapists/${therapistId}/available-slots?from=${from}&to=${to}`);
+    },
+  };
+
+  // Affiliation methods
+  affiliations = {
+    invite: async (data: { location_id: string; therapist_id: string; role?: string }) => {
+      return await this.makeRequest<LocationTherapistAffiliation>('/affiliations/invite', {
+        method: 'POST', body: JSON.stringify(data),
+      });
+    },
+    accept: async (id: string) => {
+      return await this.makeRequest<unknown>(`/affiliations/${id}/accept`, { method: 'POST' });
+    },
+    reject: async (id: string) => {
+      return await this.makeRequest<unknown>(`/affiliations/${id}/reject`, { method: 'POST' });
+    },
+    deactivate: async (id: string) => {
+      return await this.makeRequest<unknown>(`/affiliations/${id}/deactivate`, { method: 'POST' });
+    },
+    remove: async (id: string) => {
+      return await this.makeRequest<void>(`/affiliations/${id}`, { method: 'DELETE' });
+    },
+    myInvitations: async () => {
+      return await this.makeRequest<LocationTherapistAffiliation[]>('/me/affiliations');
+    },
+    listByLocation: async (locationId: string) => {
+      return await this.makeRequest<LocationTherapistAffiliation[]>(`/therapy/locations/${locationId}/therapists`);
+    },
+  };
+
+  // Therapy providers search (includes profile data)
+  therapyProviders = {
+    search: async (params: { q?: string; city?: string; with?: string; page?: number; per_page?: number } = {}) => {
+      const qs = new URLSearchParams();
+      if (params.q) qs.set('q', params.q);
+      if (params.city) qs.set('city_code', params.city);
+      if (params.with) qs.set('with', params.with);
+      if (params.page) qs.set('page', String(params.page));
+      if (params.per_page) qs.set('per_page', String(params.per_page));
+      const suffix = qs.toString() ? `?${qs.toString()}` : '';
+      return await this.makeRequest<TherapyProvider[]>(`/therapy/providers${suffix}`);
+    },
   };
 
   // Forum methods
@@ -1047,7 +1221,80 @@ class ApiClient {
     },
     myRegistrations: async () => {
       return await this.makeRequest<TrainingRegistration[]>('/me/training-registrations');
+    },
+    materials: async (trainingId: string) => {
+      return await this.makeRequest<TrainingMaterial[]>(`/trainings/${trainingId}/materials`);
+    },
+    materialDownload: async (trainingId: string, materialId: string) => {
+      return await this.makeRequest<{ download_url: string; material: TrainingMaterial }>(`/trainings/${trainingId}/materials/${materialId}/download`);
     }
+  };
+
+  // Admin trainings methods
+  adminTrainings = {
+    list: async (params: { q?: string; status?: string; category?: string; training_type?: string; limit?: number; offset?: number } = {}) => {
+      const qs = new URLSearchParams();
+      if (params.q) qs.set('q', params.q);
+      if (params.status) qs.set('status', params.status);
+      if (params.category) qs.set('category', params.category);
+      if (params.training_type) qs.set('training_type', params.training_type);
+      if (params.limit) qs.set('limit', String(params.limit));
+      if (params.offset) qs.set('offset', String(params.offset));
+      const suffix = qs.toString() ? `?${qs.toString()}` : '';
+      return await this.makeRequest<TrainingSummary[]>(`/admin/trainings/${suffix}`);
+    },
+    get: async (id: string) => {
+      return await this.makeRequest<TrainingDetail>(`/admin/trainings/${id}`);
+    },
+    create: async (data: Record<string, unknown>) => {
+      return await this.makeRequest<TrainingDetail>('/admin/trainings/', {
+        method: 'POST',
+        body: JSON.stringify(data),
+      });
+    },
+    update: async (id: string, data: Record<string, unknown>) => {
+      return await this.makeRequest<TrainingDetail>(`/admin/trainings/${id}`, {
+        method: 'PATCH',
+        body: JSON.stringify(data),
+      });
+    },
+    delete: async (id: string) => {
+      return await this.makeRequest<void>(`/admin/trainings/${id}`, {
+        method: 'DELETE',
+      });
+    },
+    registrations: async (trainingId: string) => {
+      return await this.makeRequest<TrainingRegistration[]>(`/admin/trainings/${trainingId}/registrations`);
+    },
+    updateRegistrationStatus: async (trainingId: string, regId: string, status: string) => {
+      return await this.makeRequest<{ id: string; status: string }>(`/admin/trainings/${trainingId}/registrations/${regId}`, {
+        method: 'PATCH',
+        body: JSON.stringify({ status }),
+      });
+    },
+    presignUpload: async (trainingId: string, data: { file_name: string; content_type: string; file_size: number }) => {
+      return await this.makeRequest<{ upload_url: string; material_id: string; s3_key: string; content_type: string; file_name: string; file_size: number }>(`/admin/trainings/${trainingId}/materials/presign`, {
+        method: 'POST',
+        body: JSON.stringify(data),
+      });
+    },
+    confirmMaterial: async (trainingId: string, data: { material_id: string; name: string; s3_key: string; content_type: string; file_size: number }) => {
+      return await this.makeRequest<TrainingMaterial>(`/admin/trainings/${trainingId}/materials`, {
+        method: 'POST',
+        body: JSON.stringify(data),
+      });
+    },
+    listMaterials: async (trainingId: string) => {
+      return await this.makeRequest<TrainingMaterial[]>(`/admin/trainings/${trainingId}/materials`);
+    },
+    downloadMaterial: async (trainingId: string, materialId: string) => {
+      return await this.makeRequest<{ download_url: string; material: TrainingMaterial }>(`/admin/trainings/${trainingId}/materials/${materialId}/download`);
+    },
+    deleteMaterial: async (trainingId: string, materialId: string) => {
+      return await this.makeRequest<void>(`/admin/trainings/${trainingId}/materials/${materialId}`, {
+        method: 'DELETE',
+      });
+    },
   };
 
   // Admin events methods

@@ -1,5 +1,6 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import dynamic from 'next/dynamic';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -14,9 +15,19 @@ import {
   CheckCircle,
   Building2,
   Navigation,
+  User,
 } from 'lucide-react';
 import { LOCATION_TYPE_LABELS } from '@/lib/api/types';
 import type { TherapyLocationSEO } from '@/lib/api/seo';
+
+interface LocationTherapist {
+  id: string;
+  therapist_id: string;
+  therapist_name?: string;
+  therapist_email: string;
+  status: string;
+  role?: string;
+}
 
 const LocationMap = dynamic(
   () => import('./LocationMap'),
@@ -44,6 +55,20 @@ export default function LocationDetailClient({ initialLocation }: Props) {
   }
 
   const location = initialLocation;
+  const [therapists, setTherapists] = useState<LocationTherapist[]>([]);
+
+  useEffect(() => {
+    if (!location) return;
+    const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || '';
+    fetch(`${baseUrl}/therapy/locations/${location.id}/therapists`)
+      .then(r => r.json())
+      .then(json => {
+        const data = Array.isArray(json.data) ? json.data : [];
+        setTherapists(data.filter((t: LocationTherapist) => t.status === 'active'));
+      })
+      .catch(() => {});
+  }, [location]);
+
   const hasCoordinates = !!(location.latitude && location.longitude &&
     location.latitude !== 0 && location.longitude !== 0);
 
@@ -173,6 +198,35 @@ export default function LocationDetailClient({ initialLocation }: Props) {
                       <span className="text-gray-600">{hour.open_time} - {hour.close_time}</span>
                     </div>
                   ))}
+              </div>
+            </CardContent>
+          </Card>
+        )}
+        {therapists.length > 0 && (
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg">Terapis di Lokasi Ini</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-3">
+                {therapists.map((t) => (
+                  <div key={t.id} className="flex items-center justify-between py-2 border-b border-gray-100 last:border-0">
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 bg-primary/10 rounded-full flex items-center justify-center">
+                        <User className="w-4 h-4 text-primary" />
+                      </div>
+                      <div>
+                        <p className="text-sm font-medium text-gray-900">{t.therapist_name || t.therapist_email}</p>
+                        {t.role && <p className="text-xs text-gray-500">{t.role}</p>}
+                      </div>
+                    </div>
+                    <Link href={`/terapis/${t.therapist_id}`}>
+                      <Button variant="outline" size="sm" className="text-xs border-primary text-primary hover:bg-primary/5">
+                        Lihat Profil
+                      </Button>
+                    </Link>
+                  </div>
+                ))}
               </div>
             </CardContent>
           </Card>

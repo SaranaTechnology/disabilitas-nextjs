@@ -7,8 +7,16 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { MapPin, CheckCircle, Phone, Globe, Mail, Loader2 } from 'lucide-react';
+import { MapPin, CheckCircle, Phone, Globe, Mail, Loader2, Clock } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+
+const dayNames = ['Min', 'Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab'];
+
+interface OpenHour {
+  day_of_week: number;
+  open_time: string;
+  close_time: string;
+}
 
 interface TherapyLocation {
   id: string;
@@ -23,6 +31,7 @@ interface TherapyLocation {
   website: string | null;
   is_verified: boolean;
   services: string[];
+  open_hours?: OpenHour[];
 }
 
 const PAGE_SIZE = 12;
@@ -264,6 +273,25 @@ const TherapyLocationFinder = () => {
                                 </Badge>
                               ))}
                             </div>
+                          </div>
+                        </div>
+                      )}
+
+                      {loc.open_hours && loc.open_hours.length > 0 && (
+                        <div className="text-sm">
+                          <div className="flex items-center text-gray-700 mb-1">
+                            <Clock size={14} className="mr-1.5 text-gray-400" aria-hidden="true" />
+                            <span className="font-medium">Jam Buka:</span>
+                          </div>
+                          <div className="grid grid-cols-2 gap-x-3 gap-y-0.5 text-xs text-gray-600">
+                            {[...loc.open_hours]
+                              .sort((a, b) => a.day_of_week - b.day_of_week)
+                              .map((h, i) => (
+                                <div key={i} className="flex justify-between">
+                                  <span className="font-medium">{dayNames[h.day_of_week]}</span>
+                                  <span>{h.open_time}-{h.close_time}</span>
+                                </div>
+                              ))}
                           </div>
                         </div>
                       )}
