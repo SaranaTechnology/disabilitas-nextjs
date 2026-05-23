@@ -1,4 +1,4 @@
-import { ArrowRight, Heart, Users, Hand, Eye, Banknote, CheckCircle } from 'lucide-react';
+import { ArrowRight, Heart, Users, BookOpen, CheckCircle } from 'lucide-react';
 import Link from 'next/link';
 
 const ServicesSection = () => {
@@ -6,14 +6,14 @@ const ServicesSection = () => {
     {
       id: 'layanan-kesehatan',
       icon: Heart,
-      title: 'Layanan Kesehatan',
-      description: 'Temukan lokasi terapi, klinik rehabilitasi, dan layanan kesehatan yang ramah disabilitas di kotamu.',
-      features: ['Terapi fisik & okupasi', 'Konseling psikologi', 'Rehabilitasi medik'],
+      title: 'Temukan Lokasi Terapi',
+      description: 'Cari dan bandingkan lokasi terapi, klinik rehabilitasi, dan terapis bersertifikat di kotamu.',
+      features: ['Terapi fisik & okupasi', 'Konseling psikologi', 'Filter lokasi & spesialisasi'],
       gradient: 'from-pink-500 to-rose-600',
       lightBg: 'bg-gradient-to-br from-pink-50 to-rose-50',
       iconBg: 'bg-pink-100',
       iconColor: 'text-pink-600',
-      href: '/#layanan',
+      href: '/terapis',
     },
     {
       id: 'komunitas-support',
@@ -28,40 +28,16 @@ const ServicesSection = () => {
       href: '/komunitas',
     },
     {
-      id: 'isyarat-ai',
-      icon: Hand,
-      title: 'Isyarat AI',
-      description: 'Kenali bahasa isyarat BISINDO dengan kecerdasan buatan — belajar dan berkomunikasi lebih mudah.',
-      features: ['Pengenalan isyarat real-time', 'Kamus BISINDO interaktif', 'Text-to-Speech'],
+      id: 'artikel-edukasi',
+      icon: BookOpen,
+      title: 'Artikel & Edukasi',
+      description: 'Informasi terpercaya seputar terapi, hak disabilitas, teknologi, dan kehidupan inklusif.',
+      features: ['Panduan terapi & rehabilitasi', 'Hak & regulasi disabilitas', 'Tips kehidupan inklusif'],
       gradient: 'from-violet-500 to-purple-600',
       lightBg: 'bg-gradient-to-br from-violet-50 to-purple-50',
       iconBg: 'bg-violet-100',
       iconColor: 'text-violet-600',
-      href: '/isyarat',
-    },
-    {
-      id: 'vision-ai',
-      icon: Eye,
-      title: 'Vision AI',
-      description: 'Bantuan penglihatan untuk tunanetra — deteksi objek, baca teks, dan deskripsi gambar otomatis.',
-      features: ['Deteksi objek sekitar', 'OCR baca teks', 'Deskripsi gambar AI'],
-      gradient: 'from-cyan-500 to-teal-600',
-      lightBg: 'bg-gradient-to-br from-cyan-50 to-teal-50',
-      iconBg: 'bg-cyan-100',
-      iconColor: 'text-cyan-600',
-      href: '/mata',
-    },
-    {
-      id: 'deteksi-uang',
-      icon: Banknote,
-      title: 'Deteksi Uang AI',
-      description: 'Kenali nominal uang kertas Indonesia secara otomatis — bantu tunanetra mengidentifikasi uang dengan kamera.',
-      features: ['Deteksi nominal Rupiah', 'Hitung total otomatis', 'Audio hasil deteksi'],
-      gradient: 'from-emerald-500 to-green-600',
-      lightBg: 'bg-gradient-to-br from-emerald-50 to-green-50',
-      iconBg: 'bg-emerald-100',
-      iconColor: 'text-emerald-600',
-      href: '/uang',
+      href: '/artikel',
     },
   ];
 
@@ -77,11 +53,11 @@ const ServicesSection = () => {
             Layanan Unggulan
           </span>
           <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-            Solusi Lengkap untuk
-            <span className="bg-gradient-to-r from-primary to-pink-500 bg-clip-text text-transparent"> Kebutuhan Anda</span>
+            Satu Platform untuk
+            <span className="bg-gradient-to-r from-primary to-pink-500 bg-clip-text text-transparent"> Semua Kebutuhan Disabilitas</span>
           </h2>
           <p className="text-gray-500 max-w-xl mx-auto">
-            Semua layanan dirancang khusus agar aksesibel dan mudah digunakan oleh semua orang
+            Dari temukan terapi, bergabung komunitas, hingga akses informasi terpercaya — semua ada di sini
           </p>
         </div>
 
