@@ -263,16 +263,19 @@ const TherapyLocationFinder = () => {
                       )}
 
                       {loc.services && loc.services.length > 0 && (
-                        <div className="space-y-2">
-                          <div>
-                            <span className="text-sm font-medium text-gray-700">Layanan:</span>
-                            <div className="flex flex-wrap gap-1 mt-1">
-                              {loc.services.map((service) => (
-                                <Badge key={service} variant="secondary" className="text-xs">
-                                  {service}
-                                </Badge>
-                              ))}
-                            </div>
+                        <div>
+                          <span className="text-sm font-medium text-gray-700">Layanan:</span>
+                          <div className="flex flex-wrap gap-1 mt-1">
+                            {loc.services.slice(0, 3).map((service) => (
+                              <Badge key={service} variant="secondary" className="text-xs">
+                                {service}
+                              </Badge>
+                            ))}
+                            {loc.services.length > 3 && (
+                              <Badge variant="outline" className="text-xs text-gray-500">
+                                +{loc.services.length - 3} lainnya
+                              </Badge>
+                            )}
                           </div>
                         </div>
                       )}
