@@ -1,13 +1,8 @@
-import { Heart, Shield, Accessibility, Users } from 'lucide-react';
+import Image from 'next/image';
+import Link from 'next/link';
+import { Shield, Accessibility, Users, ArrowRight } from 'lucide-react';
 
 const values = [
-  {
-    icon: Heart,
-    title: 'Dibuat dari Pengalaman Nyata',
-    description: 'Platform ini dibangun oleh penyandang disabilitas yang memahami langsung tantangan sehari-hari.',
-    color: 'bg-pink-50',
-    iconColor: 'text-pink-500',
-  },
   {
     icon: Shield,
     title: 'Data Terverifikasi',
@@ -42,15 +37,41 @@ const TrustSection = () => {
             Mengapa DisabilitasKu
           </span>
           <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-            Komitmen Kami
-            <span className="bg-gradient-to-r from-primary to-pink-500 bg-clip-text text-transparent"> untuk Anda</span>
+            Bukan Sekadar Platform —
+            <span className="bg-gradient-to-r from-primary to-pink-500 bg-clip-text text-transparent"> Lahir dari Komunitas</span>
           </h2>
           <p className="text-gray-500 max-w-xl mx-auto">
-            Kami percaya setiap orang berhak mendapatkan akses informasi dan layanan yang setara
+            DisabilitasKu berbeda karena dibangun dari dalam — oleh orang yang hidup dengan disabilitas setiap harinya
           </p>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+          {/* Founder card — personal, bukan generic */}
+          <div className="p-6 rounded-2xl bg-gradient-to-br from-pink-50 to-purple-50 border border-pink-100 shadow-sm hover:shadow-md hover:-translate-y-1 transition-all duration-300 flex flex-col">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-12 h-12 rounded-full overflow-hidden border-2 border-white shadow-sm flex-shrink-0">
+                <Image
+                  src="/images/founder-bryan.png"
+                  alt="Bryan Wahyu Kresna Putra"
+                  width={48}
+                  height={48}
+                  className="w-full h-full object-cover object-top"
+                />
+              </div>
+              <div>
+                <p className="font-bold text-gray-900 text-sm leading-tight">Bryan Wahyu</p>
+                <p className="text-xs text-primary font-medium">Founder & Penyandang CP</p>
+              </div>
+            </div>
+            <p className="text-sm text-gray-600 leading-relaxed flex-1">
+              Penyandang Cerebral Palsy, Technical Architect, dan builder. Membangun DisabilitasKu dari pengalaman nyata — bukan asumsi.
+            </p>
+            <Link href="#founder" className="inline-flex items-center gap-1 text-xs font-semibold text-primary mt-4 hover:gap-2 transition-all">
+              Baca ceritanya <ArrowRight className="w-3 h-3" />
+            </Link>
+          </div>
+
+          {/* Value cards */}
           {values.map((v) => {
             const IconComponent = v.icon;
             return (

@@ -95,19 +95,19 @@ const HeroSection = ({ initialStats }: HeroSectionProps = {}) => {
           {/* Badge */}
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-primary/10 to-amber-500/10 border border-primary/15 mb-6">
             <Sparkles className="w-4 h-4 text-amber-500" />
-            <span className="text-sm font-medium text-gray-700">Platform Terpercaya untuk Komunitas Disabilitas Indonesia</span>
+            <span className="text-sm font-medium text-gray-700">Dibuat oleh Penyandang Disabilitas, untuk Komunitas Kita</span>
           </div>
 
-          {/* Headline — value prop first */}
+          {/* Headline */}
           <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 leading-[1.15] mb-5">
-            Temukan Layanan Disabilitas
+            Untuk Keluarga yang
             <span className="block bg-gradient-to-r from-primary via-purple-600 to-pink-500 bg-clip-text text-transparent">
-              yang Tepat untuk Anda
+              Tidak Tahu Harus Mulai dari Mana
             </span>
           </h1>
 
           <p className="text-lg md:text-xl text-gray-500 max-w-2xl mx-auto mb-8">
-            Cari lokasi terapi, baca artikel terpercaya, dan bergabung dengan komunitas yang saling mendukung — semua dalam satu platform.
+            DisabilitasKu dibangun oleh <strong className="text-gray-700">Bryan Wahyu Kresna Putra</strong> — penyandang Cerebral Palsy yang memahami langsung. Temukan <strong className="text-gray-700">6.000+ lokasi terapi</strong>, komunitas aktif, dan informasi terpercaya. Semuanya gratis.
           </p>
 
           {/* Search bar — prominent, Zocdoc-style */}
@@ -194,6 +194,11 @@ const HeroSection = ({ initialStats }: HeroSectionProps = {}) => {
 
         {/* Trust signals */}
         <div className="flex flex-wrap items-center justify-center gap-6 mt-10 text-sm text-gray-600">
+          <span className="flex items-center gap-1.5 font-semibold text-primary">
+            <Heart className="w-4 h-4" />
+            Dibuat oleh Penyandang Disabilitas
+          </span>
+          <span className="w-1 h-1 rounded-full bg-gray-300" />
           <span className="flex items-center gap-1.5">
             <Shield className="w-4 h-4" />
             Data Terverifikasi
@@ -202,8 +207,6 @@ const HeroSection = ({ initialStats }: HeroSectionProps = {}) => {
           <span>WCAG 2.1 AA</span>
           <span className="w-1 h-1 rounded-full bg-gray-300" />
           <span>100% Gratis</span>
-          <span className="w-1 h-1 rounded-full bg-gray-300" />
-          <span>Dibuat oleh Penyandang Disabilitas</span>
         </div>
       </div>
     </section>

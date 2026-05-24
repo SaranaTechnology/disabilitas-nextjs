@@ -4,7 +4,7 @@ import Link from 'next/link';
 
 const FounderStorySection = () => {
   return (
-    <section className="py-24 px-4 relative overflow-hidden">
+    <section id="founder" className="py-24 px-4 relative overflow-hidden">
       <div className="absolute inset-0 bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900" />
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,rgba(139,92,246,0.15),transparent_60%)]" />
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_left,rgba(236,72,153,0.1),transparent_60%)]" />
