@@ -72,7 +72,7 @@ export default async function HomePage() {
     <div className="min-h-screen bg-white">
       <HeroSection initialStats={stats} />
       <ServicesSection />
-      <TherapyLocationFinder />
+      <TherapyLocationFinder previewLimit={6} />
       <TrustSection />
       <FounderStorySection />
       <ArticlesSection initialArticles={articles} />
